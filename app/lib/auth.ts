@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken"
+import { redirect } from "next/navigation"
 import { cookies } from "next/headers"
 import { connection, NextRequest } from "next/server"
 if (!process.env.JWT_SECRET && process.env.NODE_ENV === "production") {
@@ -33,4 +34,16 @@ export async function AuthUser() {
      } catch {
           return null
      }
+}
+
+export async function CheckRedirect() {
+     const user = await AuthUser()
+
+     if (!user) {
+          redirect("/login")
+     }
+     if (user.role !== "admin") {
+          redirect("/client")
+     }
+     return user
 }

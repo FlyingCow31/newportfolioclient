@@ -19,9 +19,9 @@ export default function Page() {
 
           if (response.ok) {
                const data = await response.json()
-
+               console.log(data.role || "Rien")
                // redirection when validating first thing
-               if (data.role == "admin") {
+               if (data.role === "admin") {
                     router.push("/")
                } else {
                     router.push("/client")

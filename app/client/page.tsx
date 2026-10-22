@@ -1,11 +1,12 @@
-import { NextRequest } from "next/server"
 import { GetClient } from "../lib/client"
 import { redirect } from "next/navigation"
-import { Avancee, Document, DocumentSection, Progression, StepTable } from "../components/client/project"
+import { DocumentSection, Progression, StepTable } from "../components/client/project"
+import { Avancee, Document } from "../lib/types"
 import { Suspense } from "react"
 import { sql } from "../lib/db"
 
 export default function ClientPage() {
+     // TODO : Integrate a loading skeletton
      return (
           <Suspense fallback={<p className="p-6">Chargement…</p>}>
                <ClientContent />
@@ -18,6 +19,9 @@ async function ClientContent() {
      if (!data) redirect("/login")
 
      const { client, projet } = data
+     if (!client) redirect("/login")
+
+     // TODO: make this a bit better than just a <p>
      if (!projet) return <p className="p-6">Aucun projet en cours.</p>
 
      const avancees = (await sql`SELECT avancee_id,
@@ -37,8 +41,6 @@ async function ClientContent() {
      document_created_at FROM document WHERE proj_id = ${projet.proj_id}`) as Document[]
 
      console.log(client)
-
-     // TODO : Integrate a loading skeletton
 
      return (
           <div className="mx-auto flex max-w-300 flex-col gap-6 px-4 py-6 sm:px-6 lg:gap-7 lg:py-8">

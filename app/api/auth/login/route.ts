@@ -48,18 +48,19 @@ export async function POST(request: Request) {
 
      // Everything's good from there
 
-     const role = user.role
+     const role = user.user_role
+     console.log(role)
      const client_id = user.client_id
      const token = jwt.sign({ id: user.id, username, role, client_id }, process.env.JWT_SECRET!, { expiresIn: "24h" })
 
-     const response = NextResponse.json({ success: true })
+     const response = NextResponse.json({ success: true, role })
      response.cookies.set("token", token, {
           httpOnly: true,
-          secure: true,
+          secure: process.env.NODE_ENV === "production",
           sameSite: "lax",
           maxAge: 60 * 60 * 24,
      })
 
-     await redis.del(key)
+     /* await redis.del(key) */
      return response
 }

@@ -1,0 +1,41 @@
+export type Projet = {
+     proj_id: number
+     client_id: number
+     proj_nom: string
+     proj_type: string
+     proj_deadline?: Date
+     proj_prix: number
+     proj_tps_rem: number
+     proj_tps_non_rem: number
+     proj_info?: {
+          clé: string
+          valeur: string
+     }
+     proj_created_at: number
+     proj_done_at?: number
+}
+export type Avancee = {
+     avancee_id: number
+     proj_id?: number
+     avancee_etape: string
+     avancee_statut: string
+     avancee_titre: string
+     avancee_message?: string
+     avancee_date: Date
+     avancee_visible_client: boolean
+}
+
+export type Document = {
+     document_id: number
+     proj_id: number
+     document_nom: string
+     document_type: string
+     document_link: string
+     document_visible_client: boolean
+     document_created_at: Date
+}
+export type ProjectProps = {
+     projet?: Projet
+     avancee?: Avancee[]
+     documents?: Document[]
+}
