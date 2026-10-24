@@ -3,6 +3,7 @@ import { CheckRedirect } from "../lib/auth"
 import { Suspense } from "react"
 import { getAvancees, getProjects } from "../lib/data"
 import { Avancee, Projet, NextSummary } from "../lib/types"
+import { formatTitle, TranslateAI } from "./projets/page"
 
 export default function HomePage() {
      // TODO : Integrate a loading skeletton
@@ -101,17 +102,15 @@ export async function HomePageContent() {
                     avancee.avancee_date.getTime() >= date &&
                     avancee.avancee_date.getTime() <= date + 7 * 24 * 60 * 60 * 1000,
           )
-          console.log("Next Avancees: " + nextAvancees)
 
           const sortedNext = nextAvancees.sort((a, b) => a.avancee_date.getTime() - b.avancee_date.getTime())
           const nextTitle = sortedNext[0].avancee_titre || "Rien!"
           const nbNextAvancees = nextAvancees.map((a) => a.proj_id).length || 0
 
           if (planning) {
-               console.log("Next:" + sortedNext)
                return sortedNext
           }
-          console.log("Nombre Next Avancee: " + nbNextAvancees)
+
           return { nbNext: nbNextAvancees, titleNext: nextTitle }
      }
 
@@ -119,11 +118,6 @@ export async function HomePageContent() {
      const { NbWaiting, TitleWaiting } = FindWaiting(avancees)
 
      const listNextAvancees = FindNext(avancees, true).slice(0, 3)
-     console.log({
-          total: listNextAvancees.length,
-          displayed: listNextAvancees.length,
-          ids: listNextAvancees.map((avancee) => avancee.avancee_id),
-     })
 
      // Main "A traiter" Block
      async function HandleBoxCreation({ avancees, projet }: { avancees: Avancee[]; projet: Projet }) {
@@ -138,36 +132,7 @@ export async function HomePageContent() {
           }
 
           // TODO: Implémenter une fonctionnalité d'auto-late si ça passe en late ?
-          // Front end was created with AI as this project is aimed at backend / TS learning, i need to translate things because i'm too lazy to modify front, and I really wanna get my hands on switch and functions.
-          function TranslateAI(statut: string) {
-               switch (statut) {
-                    case "en_cours":
-                         return "you"
-                         break
-                    case "attente_client":
-                         return "client"
-                         break
-                    case "planifie":
-                         return "planned"
-                         break
 
-                    default:
-                         return "done"
-                         break
-               }
-          }
-          function formatTitle(currentTitle: string) {
-               switch (currentTitle) {
-                    case "en_cours":
-                         return "En cours"
-                    case "attente_client":
-                         return "En attente"
-                    case "termine":
-                         return "Terminée"
-                    default:
-                         return "Planifiée"
-               }
-          }
           return (
                <li className="item flex flex-wrap items-center gap-x-4 gap-y-3">
                     {latestAvancee.avancee_date.getTime() < date ? (

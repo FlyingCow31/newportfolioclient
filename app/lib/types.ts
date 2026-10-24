@@ -34,6 +34,19 @@ export type Document = {
      document_visible_client: boolean
      document_created_at: Date
 }
+
+export type Client = {
+     client_id: number
+     client_nom: string
+     client_pren: string
+     client_bus: string
+     client_siret: number
+     client_tel: number
+     client_contact_mail: string
+     client_add: string
+     // TODO: Add notes and created at
+}
+
 export type ProjectProps = {
      projet?: Projet
      avancee?: Avancee[]
