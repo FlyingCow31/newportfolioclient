@@ -2,7 +2,7 @@ import Link from "next/link"
 import { CheckRedirect } from "../lib/auth"
 import { Suspense } from "react"
 import { getAvancees, getProjects } from "../lib/data"
-import { Avancee, Projet } from "../lib/types"
+import { Avancee, Projet, NextSummary } from "../lib/types"
 
 export default function HomePage() {
      // TODO : Integrate a loading skeletton
@@ -69,12 +69,10 @@ export async function HomePageContent() {
                     (avancee.avancee_date.getTime() < date && avancee.avancee_statut == "en_cours") ||
                     avancee.avancee_statut == "planifie",
           )
-          console.log(lateAvancees)
 
           // Set deletes duplicates entry, and then we count the size of the new array
           const numberOfLateProject = new Set(lateAvancees.map((avancees) => avancees.proj_id)).size
 
-          console.log(numberOfLateProject)
           return numberOfLateProject as number
      }
 
@@ -95,26 +93,39 @@ export async function HomePageContent() {
      }
 
      // Find the next step to make (and the number of things to do this week)
-     function FindNext(avancees: Avancee[]) {
+     function FindNext(avancee: Avancee[], planning: true): Avancee[]
+     function FindNext(avancee: Avancee[], planning?: false): NextSummary
+     function FindNext(avancees: Avancee[], planning = false): Avancee[] | NextSummary {
           const nextAvancees = avancees.filter(
                (avancee) =>
                     avancee.avancee_date.getTime() >= date &&
                     avancee.avancee_date.getTime() <= date + 7 * 24 * 60 * 60 * 1000,
           )
+          console.log("Next Avancees: " + nextAvancees)
 
           const sortedNext = nextAvancees.sort((a, b) => a.avancee_date.getTime() - b.avancee_date.getTime())
-          const nextTitle = sortedNext[0].avancee_titre
-          const nbNextAvancees = nextAvancees.map((a) => a.proj_id).length
+          const nextTitle = sortedNext[0].avancee_titre || "Rien!"
+          const nbNextAvancees = nextAvancees.map((a) => a.proj_id).length || 0
 
-          console.log(sortedNext[0].avancee_date, "Date: ", sortedNext[1].avancee_date, sortedNext[2].avancee_date)
+          if (planning) {
+               console.log("Next:" + sortedNext)
+               return sortedNext
+          }
+          console.log("Nombre Next Avancee: " + nbNextAvancees)
           return { nbNext: nbNextAvancees, titleNext: nextTitle }
      }
 
      const { nbNext, titleNext } = FindNext(avancees)
      const { NbWaiting, TitleWaiting } = FindWaiting(avancees)
 
-     // Main "A traiter" Block
+     const listNextAvancees = FindNext(avancees, true).slice(0, 3)
+     console.log({
+          total: listNextAvancees.length,
+          displayed: listNextAvancees.length,
+          ids: listNextAvancees.map((avancee) => avancee.avancee_id),
+     })
 
+     // Main "A traiter" Block
      async function HandleBoxCreation({ avancees, projet }: { avancees: Avancee[]; projet: Projet }) {
           const sortLatestAvancee = avancees
                .filter((av) => av.proj_id == projet.proj_id)
@@ -197,20 +208,25 @@ export async function HomePageContent() {
                </li>
           )
      }
+     const now = new Date()
+     const dateString =
+          now.toLocaleDateString("fr-FR", { weekday: "long" }) +
+          " " +
+          now.getDay() +
+          " " +
+          now.toLocaleDateString("fr-FR", { month: "long" })
+
+     // Main body
      return (
           <>
                <header className="flex flex-wrap items-end justify-between gap-4">
                     <div className="flex flex-col gap-1.5">
-                         {/* TODO: replace by date  */}
-                         <span className="eyebrow">Samedi 10 octobre</span>
+                         <span className="eyebrow">{dateString}</span>
                          <h1 className="page-title">Bonjour Gaël.</h1>
                     </div>
                     <div className="flex flex-wrap gap-3.5">
                          <Link href="/projets" className="btn">
                               Nouveau projet
-                         </Link>
-                         <Link href="/projets/1/avancee" className="btn btn-primary">
-                              + Nouvelle avancée
                          </Link>
                     </div>
                </header>
@@ -265,17 +281,25 @@ export async function HomePageContent() {
                                    Cette semaine
                               </h2>
                               <ul className="m-0 flex list-none flex-col gap-2.5 p-0">
-                                   {week.map((w) => (
-                                        <li key={w.day} className="flex items-center gap-3.5">
-                                             <span className="date-chip">{w.day}</span>
-                                             <span className="text-body-sm">
-                                                  <strong>{w.title}</strong> · {w.client}
+                                   {listNextAvancees.map((w) => (
+                                        <li key={w.avancee_id} className="flex items-center gap-3.5">
+                                             <span className="date-chip">
+                                                  {w.avancee_date
+                                                       .toLocaleDateString("fr-FR", { weekday: "long" })
+                                                       .slice(0, 3)
+                                                       .toUpperCase() +
+                                                       " " +
+                                                       w.avancee_date.toLocaleDateString("fr-FR", { day: "2-digit" })}
+                                             </span>
+                                             <span className="text-body-sm truncate">
+                                                  <strong>{w.avancee_titre}</strong> · {w.avancee_statut}
                                              </span>
                                         </li>
                                    ))}
                               </ul>
                          </section>
 
+                         {/* // TODO: put real data in there when TODO has been created. */}
                          <section aria-labelledby="h-todo" className="card flex flex-col gap-3">
                               <div className="flex items-baseline justify-between gap-3">
                                    <h2 id="h-todo" className="card-title">

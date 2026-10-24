@@ -39,3 +39,7 @@ export type ProjectProps = {
      avancee?: Avancee[]
      documents?: Document[]
 }
+export type NextSummary = {
+     nbNext: number
+     titleNext: string
+}
