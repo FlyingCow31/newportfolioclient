@@ -1,7 +1,8 @@
 import { cacheLife, cacheTag } from "next/cache"
 import { sql } from "./db"
-import { Avancee, Client, Projet } from "./types"
+import { Avancee, Client, Projet, Todo } from "./types"
 
+// * Get all ([])
 // For the two of them, it returns arrays because we need all of them, so they're gonna be in a .map anyway
 export async function getProjects(): Promise<Projet[]> {
      "use cache"
@@ -27,6 +28,15 @@ export async function getAvancees(): Promise<Avancee[]> {
      return (await sql`SELECT * FROM avancee ORDER BY proj_id ASC`) as Avancee[]
 }
 
+export async function getTodos(): Promise<Todo[]> {
+     "use cache"
+     cacheLife("days")
+     cacheTag("todos")
+
+     return (await sql`SELECT * FROM todo ORDER BY proj_id ASC`) as Todo[]
+}
+
+// * Get only one
 // but for this one, we need only one project (because it's in a /page/[id] format) so I need to return only the first element (SQL returns array)
 export async function getProject(proj_id: number): Promise<Projet | undefined> {
      "use cache"

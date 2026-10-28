@@ -47,6 +47,13 @@ export type Client = {
      client_created_at: Date
      client_notes: string
 }
+export type Todo = {
+     todo_id: number
+     proj_id: number
+     todo_title: string
+     todo_done: boolean
+     todo_due: number
+}
 
 export type ProjectProps = {
      projet?: Projet
