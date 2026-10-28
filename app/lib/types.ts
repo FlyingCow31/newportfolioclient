@@ -44,7 +44,8 @@ export type Client = {
      client_tel: number
      client_contact_mail: string
      client_add: string
-     // TODO: Add notes and created at
+     client_created_at: Date
+     client_notes: string
 }
 
 export type ProjectProps = {
