@@ -8,9 +8,9 @@ export type Projet = {
      proj_tps_rem: number
      proj_tps_non_rem: number
      proj_info?: {
-          clé: string
+          cle: string
           valeur: string
-     }
+     }[]
      proj_created_at: number
      proj_done_at?: number
 }

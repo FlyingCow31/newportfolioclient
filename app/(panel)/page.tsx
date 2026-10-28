@@ -104,7 +104,7 @@ export async function HomePageContent() {
           )
 
           const sortedNext = nextAvancees.sort((a, b) => a.avancee_date.getTime() - b.avancee_date.getTime())
-          const nextTitle = sortedNext[0].avancee_titre || "Rien!"
+          const nextTitle = sortedNext[0]?.avancee_titre || "Rien!"
           const nbNextAvancees = nextAvancees.map((a) => a.proj_id).length || 0
 
           if (planning) {
@@ -145,7 +145,7 @@ export async function HomePageContent() {
 
                     <div className="flex min-w-0 flex-fill flex-col gap-0.5">
                          <Link
-                              href={`/projet/${latestAvancee.proj_id}`}
+                              href={`/projets/${latestAvancee.proj_id}`}
                               className="text-lg font-bold text-ink no-underline"
                          >
                               {projet.proj_nom + "" + projet.proj_type}

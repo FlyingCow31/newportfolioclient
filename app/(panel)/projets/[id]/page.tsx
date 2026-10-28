@@ -1,161 +1,197 @@
-import Link from "next/link";
+import { getAvancee, getClient, getProject } from "@/app/lib/data"
+import { Projet } from "@/app/lib/types"
+import { AdminProgression } from "@/app/components/admin/project"
+import Link from "next/link"
+import { Suspense } from "react"
 
-const steps = [
-  { label: "1. Démarrage", meta: "Terminé · 01/10", seg: "seg-done" },
-  { label: "2. Développement", meta: "En attente client", seg: "seg-client" },
-  { label: "3. SEO", meta: "À venir", seg: "seg-todo" },
-  { label: "4. Mise en ligne", meta: "30/10", seg: "seg-todo" },
-];
-
-const journal = [
-  {
-    date: "07/10/2026",
-    status: { label: "En attente client", className: "pill-client" },
-    visible: true,
-    title: "Textes « À propos » demandés",
-    text: "3 à 5 lignes sur l'histoire de la boulangerie et 2 photos de l'équipe.",
-  },
-  {
-    date: "05/10/2026",
-    status: null,
-    visible: false,
-    title: "Pages Accueil et Services intégrées",
-    text: "Reste le formulaire de contact à brancher.",
-  },
-  {
-    date: "01/10/2026",
-    status: { label: "Terminé", className: "pill-ink" },
-    visible: true,
-    title: "Début de la commande",
-    text: "",
-  },
-];
+import { formatTitle, TranslateAI } from "../page"
+import { cacheLife } from "next/cache"
+import { timeStamp } from "console"
 
 const tech = [
-  { label: "Hébergement", value: "Vercel" },
-  { label: "Domaine", value: "OVH · boulangerie-lafont.fr" },
-  { label: "Dépôt", value: "GitHub", href: "#" },
-  { label: "Accès et clés", value: "Gestionnaire de mots de passe", href: "#" },
-];
+     { label: "Hébergement", value: "Vercel" },
+     { label: "Domaine", value: "OVH · boulangerie-lafont.fr" },
+     { label: "Dépôt", value: "GitHub", href: "#" },
+     { label: "Accès et clés", value: "Gestionnaire de mots de passe", href: "#" },
+]
 
-export async function generateStaticParams() {
-  return [{ id: "1" }, { id: "2" }, { id: "3" }, { id: "4" }];
+export default async function ProjetPage({ params }: { params: Promise<{ id: number }> }) {
+     return (
+          <Suspense fallback={<p>Chargement du projet en cours...</p>}>
+               <ProjetPageContent params={params} />
+          </Suspense>
+     )
 }
 
-export default async function ProjetPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+function PriceCalculation(projet: Projet) {
+     // price in ctms and tps in minutes
 
-  return (
-    <>
-      <header className="flex flex-col gap-3.5">
-        <Link href="/projets" className="link self-start text-body-sm no-underline">
-          ← Projets
-        </Link>
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div className="flex flex-col gap-2">
-            <div className="flex flex-wrap items-center gap-3">
-              <h1 className="page-title">Site vitrine</h1>
-              <span className="pill pill-client">En attente client</span>
-            </div>
-            <Link href="/clients" className="text-lg font-medium text-ink">
-              Boulangerie Lafont · Marie Lafont
-            </Link>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <Link href="/client" className="btn">
-              Voir comme le client
-            </Link>
-            <a href="#temps" className="btn">
-              Saisir du temps
-            </a>
-            <Link href={`/projets/${id}/avancee`} className="btn btn-primary">
-              + Nouvelle avancée
-            </Link>
-          </div>
-        </div>
-      </header>
+     const price = projet.proj_prix
+     const tpsnnrem = projet.proj_tps_non_rem
+     const tpsrem = projet.proj_tps_rem
 
-      <section aria-label="Étapes" className="card">
-        <ol className="m-0 grid list-none grid-cols-2 gap-x-2.5 gap-y-5 p-0 sm:grid-cols-4">
-          {steps.map((s) => (
-            <li key={s.label} className="flex flex-col gap-2">
-              <div className={`seg ${s.seg}`} />
-              <strong className="text-body-sm">{s.label}</strong>
-              <span className="muted text-caption">{s.meta}</span>
-            </li>
-          ))}
-        </ol>
-      </section>
+     const tps = tpsnnrem + tpsrem
+     const tauxh = Math.ceil(price / (tps / 60) / 100)
 
-      <div className="grid items-start gap-6 lg:gap-7 xl:grid-main-aside">
-        <section aria-labelledby="h-journal" className="card flex flex-col gap-4">
-          <h2 id="h-journal" className="section-title">Journal des avancées</h2>
-          <ul className="m-0 flex list-none flex-col gap-3 p-0">
-            {journal.map((entry) => (
-              <li key={entry.title} className="item flex flex-col gap-2 p-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  {entry.status && <span className={`pill ${entry.status.className}`}>{entry.status.label}</span>}
-                  <span className={`pill ${entry.visible ? "pill-done" : ""}`}>{entry.visible ? "Visible client" : "Interne"}</span>
-                  <span className="muted ml-auto text-caption">{entry.date}</span>
-                </div>
-                <strong>{entry.title}</strong>
-                {entry.text && <p className="m-0 text-body-sm">{entry.text}</p>}
-              </li>
-            ))}
-          </ul>
-        </section>
+     return tauxh
+}
+async function Timestamp(deadlineDate: Date) {
+     "use cache"
+     cacheLife("days")
+     const today = new Date().setHours(0, 0, 0, 0)
+     const deadlineDay = new Date(deadlineDate).setHours(0, 0, 0, 0)
 
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-1">
-          <section aria-labelledby="h-delai" className="card flex flex-col gap-1.5">
-            <h2 id="h-delai" className="card-title mb-1.5">Délais</h2>
-            <span className="muted text-sm">Mise en ligne prévue</span>
-            <span className="stat">30/10/2026</span>
-            <span className="text-body-sm font-bold">dans 20 jours</span>
-          </section>
+     // Convert the difference from milliseconds to days (24 × 60 × 60 × 1,000).
+     const jours = Math.ceil((deadlineDay - today) / 86_400_000)
+     return jours
+}
 
-          <section id="temps" aria-labelledby="h-renta" className="card flex flex-col gap-3.5">
-            <h2 id="h-renta" className="card-title">Rentabilité</h2>
-            <div className="flex flex-col gap-0.5">
-              <span className="muted text-sm">Taux horaire réel</span>
-              <span className="stat">42 €/h</span>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <div role="img" aria-label="18 heures payées, 6 heures non payées" className="flex h-4.5 border-3 border-ink">
-                <div className="w-3/4 bg-ink" />
-                <div className="flex-1 bg-colerr" />
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>
-                  <strong>18 h</strong> payées
-                </span>
-                <span>
-                  <strong>6 h</strong> non payées
-                </span>
-              </div>
-            </div>
-            <div className="flex justify-between border-t-2 border-ink pt-3 text-body-sm">
-              <span>Prix du projet</span>
-              <strong>1 200 €</strong>
-            </div>
-          </section>
+export async function ProjetPageContent({ params }: { params: Promise<{ id: number }> }) {
+     const { id } = await params
 
-          <section aria-labelledby="h-tech" className="card flex flex-col gap-2.5 md:col-span-2 xl:col-span-1">
-            <h2 id="h-tech" className="card-title mb-1">Infos techniques</h2>
-            {tech.map((t) => (
-              <div key={t.label} className="flex justify-between gap-3 text-body-sm">
-                <span className="muted">{t.label}</span>
-                {t.href ? (
-                  <a href={t.href} className="link text-right">
-                    {t.value}
-                  </a>
-                ) : (
-                  <strong className="text-right">{t.value}</strong>
-                )}
-              </div>
-            ))}
-          </section>
-        </div>
-      </div>
-    </>
-  );
+     const projet = (await getProject(id)) as Projet
+     const avancees = await getAvancee(id)
+     const client = await getClient(projet.client_id)
+
+     console.log(projet.proj_info)
+
+     const latestAv = [...avancees].sort((a, b) => b.avancee_date.getTime() - a.avancee_date.getTime())[0]
+
+     const deadlineDate = projet.proj_deadline ?? new Date(latestAv.avancee_date.getTime() + 7 * 24 * 60 * 60 * 1000)
+
+     const deadline = deadlineDate.toLocaleDateString("fr-FR")
+     const jours = await Timestamp(deadlineDate)
+     return (
+          <>
+               <header className="flex flex-col gap-3.5">
+                    <Link href="/projets" className="link self-start text-body-sm no-underline">
+                         ← Projets
+                    </Link>
+                    <div className="flex flex-wrap items-end justify-between gap-4">
+                         <div className="flex flex-col gap-2">
+                              <div className="flex flex-wrap items-center gap-3">
+                                   <h1 className="page-title">{projet.proj_nom}</h1>
+                                   <span className="pill pill-client">{formatTitle(latestAv.avancee_statut)}</span>
+                              </div>
+                              <Link href="/clients" className="text-lg font-medium text-ink">
+                                   {client.client_nom + " " + client.client_pren} · {client.client_bus}
+                              </Link>
+                         </div>
+                         <div className="flex flex-wrap gap-3">
+                              <a href="#temps" className="btn">
+                                   Saisir du temps
+                              </a>
+                              <Link href={`/projets/${id}/avancee`} className="btn btn-primary">
+                                   + Nouvelle avancée
+                              </Link>
+                         </div>
+                    </div>
+               </header>
+
+               {/* // TODO: Implement deletion of avancee */}
+               <section aria-label="Étapes" className="card">
+                    <AdminProgression avancee={avancees} />
+               </section>
+
+               <div className="grid items-start gap-6 lg:gap-7 xl:grid-main-aside">
+                    <section aria-labelledby="h-journal" className="card flex flex-col gap-4">
+                         <h2 id="h-journal" className="section-title">
+                              Journal des avancées
+                         </h2>
+                         <ul className="m-0 flex list-none flex-col gap-3 p-0">
+                              {[...avancees]
+                                   .sort((a, b) => b.avancee_date.getTime() - a.avancee_date.getTime())
+                                   .map((entry) => (
+                                        <li key={entry.avancee_id} className="item flex flex-col gap-2 p-4">
+                                             <div className="flex flex-wrap items-center gap-2">
+                                                  {entry.avancee_statut && (
+                                                       <span
+                                                            className={`pill pill-${TranslateAI(entry.avancee_statut)}`}
+                                                       >
+                                                            {formatTitle(entry.avancee_statut)}
+                                                       </span>
+                                                  )}
+                                                  <span className="muted ml-auto text-caption">
+                                                       {entry.avancee_date.toLocaleDateString("fr-FR")}
+                                                  </span>
+                                             </div>
+                                             <strong>{entry.avancee_titre}</strong>
+                                             {entry.avancee_message && (
+                                                  <p className="m-0 text-body-sm">{entry.avancee_message}</p>
+                                             )}
+                                        </li>
+                                   ))}
+                         </ul>
+                    </section>
+
+                    <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-1">
+                         <section aria-labelledby="h-delai" className="card flex flex-col gap-1.5">
+                              <h2 id="h-delai" className="card-title mb-1.5">
+                                   Délais
+                              </h2>
+                              <span className="muted text-sm">Mise en ligne prévue</span>
+                              <span className="stat">{deadline}</span>
+                              <span className="text-body-sm font-bold">dans {jours} jours</span>
+                         </section>
+
+                         <section id="temps" aria-labelledby="h-renta" className="card flex flex-col gap-3.5">
+                              <h2 id="h-renta" className="card-title">
+                                   Rentabilité
+                              </h2>
+                              <div className="flex flex-col gap-0.5">
+                                   <span className="muted text-sm">Taux horaire réel</span>
+                                   <span className="stat">{PriceCalculation(projet)} €/h</span>
+                              </div>
+                              <div className="flex flex-col gap-1.5">
+                                   <div
+                                        role="img"
+                                        aria-label={`${projet.proj_tps_rem / 60 || 0} payées, ${projet.proj_tps_non_rem / 60 || 0} non payées`}
+                                        className="flex h-4.5 border-3 border-ink"
+                                   >
+                                        <div
+                                             className="bg-ink"
+                                             style={{
+                                                  width: `${
+                                                       (projet.proj_tps_rem /
+                                                            (projet.proj_tps_rem + projet.proj_tps_non_rem)) *
+                                                       100
+                                                  }%`,
+                                             }}
+                                        />
+                                        <div className="flex-1 bg-colerr" />
+                                   </div>
+                                   <div className="flex justify-between text-sm">
+                                        <span>
+                                             <strong>{projet.proj_tps_rem / 60 || 0} h</strong> payées
+                                        </span>
+                                        <span>
+                                             <strong>{projet.proj_tps_non_rem / 60 || 0} h</strong> non payées
+                                        </span>
+                                   </div>
+                              </div>
+                              <div className="flex justify-between border-t-2 border-ink pt-3 text-body-sm">
+                                   <span>Prix du projet</span>
+                                   <strong>{projet.proj_prix / 100} €</strong>
+                              </div>
+                         </section>
+
+                         <section
+                              aria-labelledby="h-tech"
+                              className="card flex flex-col gap-2.5 md:col-span-2 xl:col-span-1"
+                         >
+                              <h2 id="h-tech" className="card-title mb-1">
+                                   Infos techniques
+                              </h2>
+                              {projet.proj_info?.map((info, index) => (
+                                   <div key={index} className="flex justify-between gap-3 text-body-sm">
+                                        <span className="muted">{info.cle}</span>
+
+                                        <strong className="text-right">{info.valeur}</strong>
+                                   </div>
+                              ))}
+                         </section>
+                    </div>
+               </div>
+          </>
+     )
 }

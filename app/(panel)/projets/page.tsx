@@ -93,9 +93,9 @@ export async function ProjetsPageContent({ searchParams }: { searchParams: Promi
           <>
                <header className="flex flex-wrap items-end justify-between gap-4">
                     <h1 className="page-title">Projets.</h1>
-                    <button type="button" className="btn btn-primary">
+                    <Link href={"/projets/nouveau"} className="btn btn-primary">
                          + Nouveau projet
-                    </button>
+                    </Link>
                </header>
 
                <Suspense fallback={<p>Loading...</p>}>

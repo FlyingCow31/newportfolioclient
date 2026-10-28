@@ -28,12 +28,29 @@ export async function getAvancees(): Promise<Avancee[]> {
 }
 
 // but for this one, we need only one project (because it's in a /page/[id] format) so I need to return only the first element (SQL returns array)
-export async function getProject(proj_id: number) {
+export async function getProject(proj_id: number): Promise<Projet | undefined> {
      "use cache"
      cacheLife("days")
-     cacheTag(`project` + `Project n${proj_id}`)
+     cacheTag(`project-n${proj_id}`)
 
-     const projects = await sql`SELECT * FROM projet WHERE proj_id = ${proj_id}`
+     const projects = (await sql`SELECT * FROM projet WHERE proj_id = ${proj_id}`) as Projet[]
 
      return projects[0]
+}
+export async function getAvancee(proj_id: number): Promise<Avancee[]> {
+     "use cache"
+     cacheLife("days")
+     cacheTag(`projet-n${proj_id}`)
+     const avancees = await sql`SELECT * FROM avancee WHERE proj_id = ${proj_id}`
+
+     return avancees as Avancee[]
+}
+export async function getClient(client_id: number): Promise<Client> {
+     "use cache"
+     cacheLife("days")
+     cacheTag(`client-n${client_id}`)
+
+     const client = (await sql`SELECT * FROM client WHERE client_id = ${client_id}`) as Client[]
+
+     return client[0] as Client
 }
