@@ -75,6 +75,12 @@ export type Depense = {
      depense_date: Date
 }
 
+export type Clause = {
+     clause_id: number
+     clause_key: string
+     clause_text: string
+}
+
 export type ProjectProps = {
      projet?: Projet
      avancee?: Avancee[]
