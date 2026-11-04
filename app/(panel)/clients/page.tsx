@@ -1,6 +1,7 @@
 import { Suspense } from "react"
 import Link from "next/link"
 import { getClients, getProjects } from "@/app/lib/data"
+import { CheckRedirect } from "@/app/lib/auth"
 
 const documents = [
      { name: "devis.pdf", date: "09/10" },
@@ -30,6 +31,7 @@ async function SelectedClient({ searchParams }: { searchParams: Promise<{ id?: s
 }
 
 async function ClientsView({ clientId, query }: { clientId?: string; query: string }) {
+     await CheckRedirect()
      const clients = await getClients()
      const projects = await getProjects()
 

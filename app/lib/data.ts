@@ -1,6 +1,6 @@
 import { cacheLife, cacheTag } from "next/cache"
 import { sql } from "./db"
-import { Avancee, Client, Projet, Todo } from "./types"
+import { Avancee, Client, Depense, Invoice, Projet, Todo } from "./types"
 
 // * Get all ([])
 // For the two of them, it returns arrays because we need all of them, so they're gonna be in a .map anyway
@@ -34,6 +34,20 @@ export async function getTodos(): Promise<Todo[]> {
      cacheTag("todos")
 
      return (await sql`SELECT * FROM todo ORDER BY proj_id ASC`) as Todo[]
+}
+
+export async function getInvoices(): Promise<Invoice[]> {
+     "use cache"
+     cacheLife("max")
+     cacheTag("invoices")
+     return (await sql`SELECT * FROM facture ORDER BY facture_date ASC`) as Invoice[]
+}
+
+export async function getDepenses(): Promise<Depense[]> {
+     "use cache"
+     cacheLife("max")
+     cacheTag("invoices")
+     return (await sql`SELECT * FROM depense ORDER BY depense_date DESC`) as Depense[]
 }
 
 // * Get only one

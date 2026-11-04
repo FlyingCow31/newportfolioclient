@@ -7,6 +7,7 @@ import { Suspense } from "react"
 import { formatTitle, TranslateAI } from "../page"
 import { cacheLife } from "next/cache"
 import { timeStamp } from "console"
+import { CheckRedirect } from "@/app/lib/auth"
 
 const tech = [
      { label: "Hébergement", value: "Vercel" },
@@ -47,6 +48,7 @@ async function Timestamp(deadlineDate: Date) {
 }
 
 export async function ProjetPageContent({ params }: { params: Promise<{ id: number }> }) {
+     await CheckRedirect()
      const { id } = await params
 
      const projet = (await getProject(id)) as Projet

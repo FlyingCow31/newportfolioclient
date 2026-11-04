@@ -55,6 +55,26 @@ export type Todo = {
      todo_due: number
 }
 
+export type Invoice = {
+     facture_id: number
+     proj_id: number
+     facture_num: string
+     facture_mont: number
+     facture_lien: string
+     facture_date: Date
+     facture_pay_deadline: Date
+     facture_paid_at?: Date
+     facture_temps?: number
+}
+export type Depense = {
+     depense_id: number
+     proj_id?: number
+     depense_label: string
+     depense_categorie: string
+     depense_mont: number
+     depense_date: Date
+}
+
 export type ProjectProps = {
      projet?: Projet
      avancee?: Avancee[]

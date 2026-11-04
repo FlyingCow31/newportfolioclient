@@ -17,37 +17,6 @@ export default function HomePage() {
 // TODO: delete when the calendar has been integrated
 const stats = [{ label: "Déclaration URSSAF", value: "31/10", sub: "dans 21 jours", tone: "" }]
 
-const tasks = [
-     {
-          status: "late",
-          statusLabel: "En retard",
-          title: "Site vitrine - Cabinet Roux",
-          detail: "Maquette de l'accueil · prévue le 08/10",
-          cta: "Ajouter une avancée",
-          href: "/projets/1/avancee",
-     },
-     {
-          status: "you",
-          statusLabel: "À toi",
-          title: "Refonte - Gîtes du Lac",
-          detail: "Intégrer les photos reçues hier",
-          cta: "Ouvrir",
-          href: "/projets/2",
-     },
-     {
-          status: "client",
-          statusLabel: "En attente client",
-          title: "Site vitrine - Boulangerie Lafont",
-          detail: "Textes « À propos » demandés le 07/10",
-          cta: "Relancer",
-     },
-]
-
-const week = [
-     { day: "MAR 14", title: "Mise en ligne", client: "Gîtes du Lac" },
-     { day: "VEN 17", title: "Point client", client: "Cabinet Roux" },
-]
-
 const todos = [
      { label: "Relancer Boulangerie Lafont", done: false },
      { label: "Exporter les photos - Gîtes du Lac", done: false },

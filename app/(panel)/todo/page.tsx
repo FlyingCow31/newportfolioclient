@@ -1,3 +1,4 @@
+import { CheckRedirect } from "@/app/lib/auth"
 import { getClients, getProjects, getTodos } from "@/app/lib/data"
 import { Todo } from "@/app/lib/types"
 import { connection } from "next/server"
@@ -12,6 +13,7 @@ export default function TodoPage() {
 }
 
 export async function TodoPageContent() {
+     await CheckRedirect()
      const todos = await getTodos()
      const clients = await getClients()
      const projects = await getProjects()
