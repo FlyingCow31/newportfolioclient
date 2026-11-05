@@ -3,7 +3,8 @@ import Link from "next/link"
 import { redirect } from "next/navigation"
 import { AuthUser } from "@/app/lib/auth"
 import { getClients } from "@/app/lib/data"
-import NewProjectForm, { type ClientOption } from "@/app/components/admin/projets/NewProjectForm"
+import NewProjectForm from "@/app/components/admin/projets/NewProjectForm"
+import { Client } from "@/app/lib/types"
 
 export default function NouveauProjetPage() {
      return (
@@ -26,7 +27,7 @@ async function FormWithClients() {
      const session = await AuthUser()
      if (session?.role !== "admin") redirect("/login")
 
-     const clients = (await getClients()) as ClientOption[]
+     const clients = (await getClients()) as Client[]
 
      return <NewProjectForm clients={clients} />
 }

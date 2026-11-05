@@ -7,7 +7,9 @@ import bcrypt from "bcryptjs"
 
 const loginSchema = z.object({
      username: z.string().min(1).max(100).nonempty(),
+     // Existing accounts may have valid passwords shorter than the registration minimum.
      password: z.string().min(1).max(255).nonempty(),
+     /* .regex(/^(?=.*\d)(?=.*[^A-Za-z0-9]).+$/) */
 })
 
 export async function POST(request: Request) {

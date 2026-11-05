@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { CheckRedirect } from "../lib/auth"
 import { Suspense } from "react"
-import { getAvancees, getProjects } from "../lib/data"
+import { getAvancees, getProjects, getTodos } from "../lib/data"
 import { Avancee, Projet, NextSummary } from "../lib/types"
 import { formatTitle, TranslateAI } from "./projets/page"
 
@@ -17,17 +17,12 @@ export default function HomePage() {
 // TODO: delete when the calendar has been integrated
 const stats = [{ label: "Déclaration URSSAF", value: "31/10", sub: "dans 21 jours", tone: "" }]
 
-const todos = [
-     { label: "Relancer Boulangerie Lafont", done: false },
-     { label: "Exporter les photos - Gîtes du Lac", done: false },
-     { label: "Envoyer le devis - Atelier Peinture", done: true },
-]
-
 export async function HomePageContent() {
      await CheckRedirect()
 
      const projects = await getProjects()
      const avancees = await getAvancees()
+     const todos = await getTodos()
 
      // used for down there
      const date = Date.now()
@@ -215,25 +210,31 @@ export async function HomePageContent() {
                                    Cette semaine
                               </h2>
                               <ul className="m-0 flex list-none flex-col gap-2.5 p-0">
-                                   {listNextAvancees.map((w) => (
-                                        <li key={w.avancee_id} className="flex items-center gap-3.5">
-                                             <span className="date-chip">
-                                                  {w.avancee_date
-                                                       .toLocaleDateString("fr-FR", { weekday: "long" })
-                                                       .slice(0, 3)
-                                                       .toUpperCase() +
-                                                       " " +
-                                                       w.avancee_date.toLocaleDateString("fr-FR", { day: "2-digit" })}
-                                             </span>
-                                             <span className="text-body-sm truncate">
-                                                  <strong>{w.avancee_titre}</strong> · {w.avancee_statut}
-                                             </span>
-                                        </li>
-                                   ))}
+                                   {listNextAvancees[0] ? (
+                                        listNextAvancees.map((w) => (
+                                             <li key={w.avancee_id} className="flex items-center gap-3.5">
+                                                  <span className="date-chip">
+                                                       {w.avancee_date
+                                                            .toLocaleDateString("fr-FR", { weekday: "long" })
+                                                            .slice(0, 3)
+                                                            .toUpperCase() +
+                                                            " " +
+                                                            w.avancee_date.toLocaleDateString("fr-FR", {
+                                                                 day: "2-digit",
+                                                            })}
+                                                  </span>
+                                                  <span className="text-body-sm truncate">
+                                                       <strong>{w.avancee_titre}</strong> · {w.avancee_statut}
+                                                  </span>
+                                             </li>
+                                        ))
+                                   ) : (
+                                        <p>Rien à faire!</p>
+                                   )}
                               </ul>
                          </section>
 
-                         {/* // TODO: put real data in there when TODO has been created. */}
+                         {/* // TODO: logic where if it's crossed, it vanishes.  */}
                          <section aria-labelledby="h-todo" className="card flex flex-col gap-3">
                               <div className="flex items-baseline justify-between gap-3">
                                    <h2 id="h-todo" className="card-title">
@@ -243,15 +244,19 @@ export async function HomePageContent() {
                                         Tout voir
                                    </Link>
                               </div>
-                              {todos.map((todo) => (
-                                   <label
-                                        key={todo.label}
-                                        className="flex min-h-10 cursor-pointer items-center gap-3 text-body-sm has-checked:text-muted has-checked:line-through"
-                                   >
-                                        <input type="checkbox" defaultChecked={todo.done} className="check" />
-                                        {todo.label}
-                                   </label>
-                              ))}
+                              {todos
+                                   .sort((a, b) => a.todo_due - b.todo_due)
+                                   .filter((t) => t.todo_done !== true)
+                                   .map((todo) => (
+                                        <label
+                                             key={todo.todo_id}
+                                             className="flex min-h-10 cursor-pointer items-center gap-3 text-body-sm has-checked:text-muted has-checked:line-through"
+                                        >
+                                             <input type="checkbox" defaultChecked={todo.todo_done} className="check" />
+                                             {todo.todo_title}
+                                        </label>
+                                   ))
+                                   .slice(0, 3)}
                          </section>
                     </div>
                </div>
