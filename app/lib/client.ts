@@ -1,4 +1,4 @@
-import { AuthUser } from "./auth"
+import { AuthUser } from "./auth/auth"
 import { sql } from "./db"
 
 export async function GetClient() {

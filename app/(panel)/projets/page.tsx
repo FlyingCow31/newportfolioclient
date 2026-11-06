@@ -1,6 +1,6 @@
 import { Suspense } from "react"
 import Link from "next/link"
-import { CheckRedirect } from "@/app/lib/auth"
+import { CheckRedirect } from "@/app/lib/auth/auth"
 import { getProjects, getAvancees, getClients } from "@/app/lib/data"
 import { Avancee, Client, Projet } from "@/app/lib/types"
 

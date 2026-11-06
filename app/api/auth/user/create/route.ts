@@ -1,1 +1,0 @@
-// This file checks that the user doesn't exist, check if you're admin and then create the user in the DB with a random hashed password. It then sends a mail to the client with their password and their ID so that they can reset it. If it's not done within 3 days, the account gets locked.

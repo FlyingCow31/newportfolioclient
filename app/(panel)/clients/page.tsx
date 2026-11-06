@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 import Link from "next/link"
 import { getClients, getProjects } from "@/app/lib/data"
-import { CheckRedirect } from "@/app/lib/auth"
+import { CheckRedirect } from "@/app/lib/auth/auth"
 
 const documents = [
      { name: "devis.pdf", date: "09/10" },

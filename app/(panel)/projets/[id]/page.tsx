@@ -7,7 +7,7 @@ import { Suspense } from "react"
 import { formatTitle, TranslateAI } from "../page"
 import { cacheLife } from "next/cache"
 import { timeStamp } from "console"
-import { CheckRedirect } from "@/app/lib/auth"
+import { CheckRedirect } from "@/app/lib/auth/auth"
 
 const tech = [
      { label: "Hébergement", value: "Vercel" },

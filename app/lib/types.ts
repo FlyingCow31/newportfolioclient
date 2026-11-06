@@ -41,7 +41,7 @@ export type Client = {
      client_pren: string
      client_bus: string
      client_siret: number
-     client_tel: number
+     client_tel?: number
      client_contact_mail: string
      client_add: string
      client_created_at: Date

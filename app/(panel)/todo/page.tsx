@@ -1,4 +1,4 @@
-import { CheckRedirect } from "@/app/lib/auth"
+import { CheckRedirect } from "@/app/lib/auth/auth"
 import { getClients, getProjects, getTodos } from "@/app/lib/data"
 import { Todo } from "@/app/lib/types"
 import { connection } from "next/server"

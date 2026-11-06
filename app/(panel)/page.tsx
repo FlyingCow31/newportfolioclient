@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { CheckRedirect } from "../lib/auth"
+import { CheckRedirect } from "../lib/auth/auth"
 import { Suspense } from "react"
 import { getAvancees, getProjects, getTodos } from "../lib/data"
 import { Avancee, Projet, NextSummary } from "../lib/types"
