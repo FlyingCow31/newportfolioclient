@@ -2,6 +2,7 @@ import { Suspense } from "react"
 import Link from "next/link"
 import { getClients, getProjects } from "@/app/lib/data"
 import { CheckRedirect } from "@/app/lib/auth/auth"
+import NewClientModal from "@/app/components/client/NewClientModal"
 
 const documents = [
      { name: "devis.pdf", date: "09/10" },
@@ -13,9 +14,7 @@ export default function ClientsPage({ searchParams }: { searchParams: Promise<{ 
           <>
                <header className="flex flex-wrap items-end justify-between gap-4">
                     <h1 className="page-title">Clients.</h1>
-                    <button type="button" className="btn btn-primary">
-                         + Nouveau client
-                    </button>
+                    <NewClientModal />
                </header>
 
                <Suspense fallback={<p>Chargement...</p>}>

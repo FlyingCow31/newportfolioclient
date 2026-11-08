@@ -40,12 +40,21 @@ export type Client = {
      client_nom: string
      client_pren: string
      client_bus: string
-     client_siret: number
+     client_siret: number | string
      client_tel?: number
      client_contact_mail: string
      client_add: string
      client_created_at: Date
      client_notes: string
+}
+export type User = {
+     user_id: number
+     client_id: number | null
+     user_mail: string
+     user_password: string
+     user_role: "admin" | "client"
+     user_last_login_at?: number
+     user_created_at: number
 }
 export type Todo = {
      todo_id: number

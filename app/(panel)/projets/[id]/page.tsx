@@ -8,6 +8,7 @@ import { formatTitle, TranslateAI } from "../page"
 import { cacheLife } from "next/cache"
 import { timeStamp } from "console"
 import { CheckRedirect } from "@/app/lib/auth/auth"
+import TimeEntryModal from "@/app/components/projet/TimeEntryModal"
 
 const tech = [
      { label: "Hébergement", value: "Vercel" },
@@ -80,9 +81,13 @@ export async function ProjetPageContent({ params }: { params: Promise<{ id: numb
                               </Link>
                          </div>
                          <div className="flex flex-wrap gap-3">
-                              <a href="#temps" className="btn">
-                                   Saisir du temps
-                              </a>
+                              <TimeEntryModal
+                                   projId={projet.proj_id}
+                                   projectLabel={`${projet.proj_nom} · ${client.client_bus ?? client.client_nom}`}
+                                   projPrix={projet.proj_prix}
+                                   tpsRem={projet.proj_tps_rem}
+                                   tpsNonRem={projet.proj_tps_non_rem}
+                              />
                               <Link href={`/projets/${id}/avancee`} className="btn btn-primary">
                                    + Nouvelle avancée
                               </Link>

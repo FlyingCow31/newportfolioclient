@@ -1,6 +1,7 @@
 import { AdminCheck } from "@/app/lib/auth/auth"
 import { GeneratePassword } from "@/app/lib/auth/generatePassword"
 import { sql } from "@/app/lib/db"
+import ResetMail from "@/app/lib/mails/reset"
 import { Client } from "@/app/lib/types"
 import bcrypt from "bcryptjs"
 import { NextRequest, NextResponse } from "next/server"
@@ -8,28 +9,39 @@ import z from "zod"
 
 // create client -> return client_id -> pass it to user -> create user with random generated password -> send mail
 // This gets called when creating a user OR a project. In the case of the /project page, you must first run this so it returns the client_id to link the project, before actually creating the project.
-type UserType = {
-     user_mail: string
-     client_id: number
-}
-
 const clientSchema = z.object({
      client_nom: z.string().min(1).max(50).nonempty(),
      client_pren: z.string().min(1).max(50).nonempty(),
-     client_add: z.string().min(1).max(100).optional(),
+     client_add: z.string().min(1).max(255).optional(),
      client_notes: z.string().min(1).max(255).optional(),
-     client_siret: z.number().optional(),
-     client_tel: z.number().optional(),
+     client_siret: z.preprocess(
+          (value) => (value === "" || value === null ? undefined : String(value)),
+          z
+               .string()
+               .regex(/^[1-9]\d{13}$/, "Le SIRET doit contenir 14 chiffres.")
+               .transform(Number)
+               .optional(),
+     ),
+     client_tel: z.preprocess(
+          (value) => (value === "" || value === null ? undefined : value),
+          z.coerce.number().optional(),
+     ),
      client_bus: z.string().min(1).max(50).optional(),
      client_contact_mail: z.string().min(1).max(100).nonempty(),
 })
-export default async function POST(request: NextRequest) {
+
+function getErrorMessage(error: unknown): string {
+     return error instanceof Error ? error.message : "Une erreur est survenue."
+}
+
+export async function POST(request: NextRequest) {
      const isAdmin = AdminCheck(request)
      if (!isAdmin) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 
      const result = clientSchema.safeParse(await request.json())
      if (!result.success) {
-          return NextResponse.json({ error: "Invalid request" }, { status: 400 })
+          const messages = result.error.issues.map((issue) => issue.message).join(" ")
+          return NextResponse.json({ error: messages }, { status: 400 })
      }
      const {
           client_nom,
@@ -65,11 +77,16 @@ export default async function POST(request: NextRequest) {
 
                const client_id = client.client_id
                const mail = client_contact_mail
-               const createdUser =
-                    await sql`INSERT INTO utilisateur (user_mail, client_id, user_password, user_role) VALUES (${mail}, ${client_id}, ${hashed}, ${"client"} ) RETURNING client_id`
+               const [createdUser] =
+                    await sql`INSERT INTO utilisateur (user_mail, client_id, user_password, user_role) VALUES (${mail}, ${client_id}, ${hashed}, ${"client"} ) RETURNING client_id, user_mail`
 
-               if (!createdUser[0]) return NextResponse.json({ status: 500 })
-               // ! Send the mail
+               if (!createdUser) return NextResponse.json({ status: 500 })
+
+               await ResetMail({
+                    prenom: client.client_pren,
+                    email: createdUser.user_mail,
+                    password: user_password,
+               })
                return NextResponse.json({ status: 201, client_id })
           }
 
@@ -101,7 +118,7 @@ export default async function POST(request: NextRequest) {
                               ${business},
                               ${client_contact_mail}
                          )
-                         RETURNING client_id
+                         RETURNING client_id, client_pren
                     ),
                     new_user AS (
                          INSERT INTO utilisateur (
@@ -118,17 +135,25 @@ export default async function POST(request: NextRequest) {
                          FROM new_client
                          RETURNING user_id, user_mail, client_id, user_role
                     )
-                    SELECT * FROM new_user
+                    SELECT new_user.*, new_client.client_pren
+                    FROM new_user
+                    JOIN new_client ON new_client.client_id = new_user.client_id
                     `
 
                if (!created) return NextResponse.json({ error: "Client/User was not created" }, { status: 500 })
                const client_id = created.client_id
-               //! Insert mail sending script here
+
+               await ResetMail({
+                    prenom: created.client_pren,
+                    email: created.user_mail,
+                    password: user_password,
+               })
+
                return NextResponse.json({ success: true, client_id })
           } catch (err) {
-               return NextResponse.json({ error: err }, { status: 500 })
+               return NextResponse.json({ error: getErrorMessage(err) }, { status: 500 })
           }
      } catch (err) {
-          return NextResponse.json({ error: err }, { status: 500 })
+          return NextResponse.json({ error: getErrorMessage(err) }, { status: 500 })
      }
 }
