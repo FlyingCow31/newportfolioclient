@@ -4,6 +4,7 @@ import { sql } from "@/app/lib/db"
 import ResetMail from "@/app/lib/mails/reset"
 import { Client } from "@/app/lib/types"
 import bcrypt from "bcryptjs"
+import { updateTag } from "next/cache"
 import { NextRequest, NextResponse } from "next/server"
 import z from "zod"
 
@@ -87,6 +88,7 @@ export async function POST(request: NextRequest) {
                     email: createdUser.user_mail,
                     password: user_password,
                })
+
                return NextResponse.json({ status: 201, client_id })
           }
 
@@ -149,6 +151,7 @@ export async function POST(request: NextRequest) {
                     password: user_password,
                })
 
+               updateTag("clients")
                return NextResponse.json({ success: true, client_id })
           } catch (err) {
                return NextResponse.json({ error: getErrorMessage(err) }, { status: 500 })

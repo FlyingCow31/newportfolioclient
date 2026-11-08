@@ -3,6 +3,7 @@ import Link from "next/link"
 import { getClients, getProjects } from "@/app/lib/data"
 import { CheckRedirect } from "@/app/lib/auth/auth"
 import NewClientModal from "@/app/components/client/NewClientModal"
+import DeleteButton from "@/app/components/client/DeleteButton"
 
 const documents = [
      { name: "devis.pdf", date: "09/10" },
@@ -106,7 +107,8 @@ async function ClientsView({ clientId, query }: { clientId?: string; query: stri
                                         </span>
                                    </div>
                               </div>
-                              <div className="flex flex-wrap gap-2.5">
+                              <div className="flex flex-wrap gap-2.5 items-center">
+                                   <DeleteButton client_id={current.client_id} />
                                    <button type="button" className="btn btn-sm shadow-none">
                                         Modifier
                                    </button>
