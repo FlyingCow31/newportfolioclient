@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import React, { useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { STEP_TEMPLATES, type ProjectType } from "@/app/lib/steps"
 import { Client } from "@/app/lib/types"
 
@@ -22,6 +23,7 @@ const projectTypes: { id: ProjectType; label: string }[] = [
 const choiceClass = "btn btn-sm min-h-12 shadow-none aria-pressed:shadow-brutal-sm"
 
 export default function NewProjectForm({ clients }: { clients: Client[] }) {
+     const router = useRouter()
      const [clientMode, setClientMode] = useState<ClientMode>("existing")
      const [type, setType] = useState<ProjectType>("site")
      const [access, setAccess] = useState(true)
@@ -51,6 +53,7 @@ export default function NewProjectForm({ clients }: { clients: Client[] }) {
      }
 
      // all values (except infos and Types (Site/Maintenance))
+     const [clientId, setClientId] = useState<number | null>(clients[0]?.client_id ?? null)
      const [name, setName] = useState("")
      const [surname, setSurname] = useState("")
      const [business, setBusiness] = useState("")
@@ -58,9 +61,66 @@ export default function NewProjectForm({ clients }: { clients: Client[] }) {
      const [projectName, setProjectName] = useState("")
      const [deadline, setDeadline] = useState<Date | null>(null)
      const [price, setPrice] = useState<number>(0)
+     const [errors, setErrors] = useState<string | null>(null)
+
+     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+          e.preventDefault()
+          setErrors(null)
+
+          let projectClientId = clientId
+
+          if (clientMode === "new") {
+               const response = await fetch(`/api/auth/client/create`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                         client_nom: surname,
+                         client_pren: name,
+                         client_bus: business,
+                         client_contact_mail: contact,
+                    }),
+               })
+               if (!response.ok) {
+                    const errors = await response.json()
+                    return setErrors(errors.error)
+               } else {
+                    const data = await response.json()
+                    projectClientId = data.client_id
+                    setClientId(projectClientId)
+               }
+          }
+
+          if (projectClientId === null) {
+               return setErrors("Veuillez sélectionner un client.")
+          }
+
+          const response = await fetch(`/api/projects/create`, {
+               method: "POST",
+               headers: { "Content-Type": "application/json" },
+               body: JSON.stringify({
+                    clientId: projectClientId,
+                    projectName,
+                    deadline: deadline?.toISOString() ?? null,
+                    type,
+                    price,
+                    infos,
+               }),
+          })
+          if (!response.ok) {
+               const errors = await response.json()
+               return setErrors(errors.error)
+          }
+
+          const data = await response.json()
+          router.push(`/projets/${data.proj_id}`)
+     }
 
      return (
-          <form aria-label="Nouveau projet" className="grid items-start gap-6 lg:gap-7 xl:grid-main-aside">
+          <form
+               onSubmit={handleSubmit}
+               aria-label="Nouveau projet"
+               className="grid items-start gap-6 lg:gap-7 xl:grid-main-aside"
+          >
                <input type="hidden" name="client_mode" value={clientMode} />
                <input type="hidden" name="proj_type" value={type} />
 
@@ -88,7 +148,19 @@ export default function NewProjectForm({ clients }: { clients: Client[] }) {
                                    <label htmlFor="np-client" className="label">
                                         Choisir un client
                                    </label>
-                                   <select id="np-client" name="client_id" className="field">
+                                   <select
+                                        id="np-client"
+                                        name="client_id"
+                                        className="field"
+                                        value={clientId ?? ""}
+                                        onChange={(e) => {
+                                             setClientId(Number(e.target.value))
+                                             console.log(Number(e.target.value) || "Non")
+                                        }}
+                                   >
+                                        <option value="" disabled>
+                                             Choisir un client
+                                        </option>
                                         {clients.map((c) => (
                                              <option key={c.client_id} value={c.client_id}>
                                                   {c.client_bus ? `${c.client_bus} · ` : ""}
@@ -339,7 +411,12 @@ export default function NewProjectForm({ clients }: { clients: Client[] }) {
                     </section>
 
                     <div className="flex flex-col gap-3">
-                         <button type="button" className="btn btn-primary min-h-13 w-full shadow-accent">
+                         {errors && (
+                              <div className="border-3 border-ink bg-white p-5 shadow-brutal-lg">
+                                   <p className="text-red-900">{errors}</p>
+                              </div>
+                         )}
+                         <button type="submit" className="btn btn-primary min-h-13 w-full shadow-accent">
                               Créer le projet
                          </button>
                          <Link href="/projets" className="btn w-full">

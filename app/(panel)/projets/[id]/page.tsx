@@ -31,8 +31,12 @@ function PriceCalculation(projet: Projet) {
      const price = projet.proj_prix
      const tpsnnrem = projet.proj_tps_non_rem
      const tpsrem = projet.proj_tps_rem
-
      const tps = tpsnnrem + tpsrem
+
+     if (tps === 0) {
+          return 0
+     }
+
      const tauxh = Math.ceil(price / (tps / 60) / 100)
 
      return tauxh
@@ -74,7 +78,9 @@ export async function ProjetPageContent({ params }: { params: Promise<{ id: numb
                          <div className="flex flex-col gap-2">
                               <div className="flex flex-wrap items-center gap-3">
                                    <h1 className="page-title">{projet.proj_nom}</h1>
-                                   <span className="pill pill-client">{formatTitle(latestAv.avancee_statut)}</span>
+                                   <span className="pill pill-client">
+                                        {formatTitle(latestAv?.avancee_statut) || "Rien"}
+                                   </span>
                               </div>
                               <Link href="/clients" className="text-lg font-medium text-ink">
                                    {client.client_nom + " " + client.client_pren} · {client.client_bus}
@@ -96,39 +102,45 @@ export async function ProjetPageContent({ params }: { params: Promise<{ id: numb
                </header>
 
                {/* // TODO: Implement deletion of avancee */}
-               <section aria-label="Étapes" className="card">
-                    <AdminProgression avancee={avancees} />
-               </section>
+               {avancees[0] && (
+                    <section aria-label="Étapes" className="card">
+                         <AdminProgression avancee={avancees} />
+                    </section>
+               )}
 
                <div className="grid items-start gap-6 lg:gap-7 xl:grid-main-aside">
                     <section aria-labelledby="h-journal" className="card flex flex-col gap-4">
                          <h2 id="h-journal" className="section-title">
                               Journal des avancées
                          </h2>
-                         <ul className="m-0 flex list-none flex-col gap-3 p-0">
-                              {[...avancees]
-                                   .sort((a, b) => b.avancee_date.getTime() - a.avancee_date.getTime())
-                                   .map((entry) => (
-                                        <li key={entry.avancee_id} className="item flex flex-col gap-2 p-4">
-                                             <div className="flex flex-wrap items-center gap-2">
-                                                  {entry.avancee_statut && (
-                                                       <span
-                                                            className={`pill pill-${TranslateAI(entry.avancee_statut)}`}
-                                                       >
-                                                            {formatTitle(entry.avancee_statut)}
+                         {avancees[0] ? (
+                              <ul className="m-0 flex list-none flex-col gap-3 p-0">
+                                   {[...avancees]
+                                        .sort((a, b) => b.avancee_date.getTime() - a.avancee_date.getTime())
+                                        .map((entry) => (
+                                             <li key={entry.avancee_id} className="item flex flex-col gap-2 p-4">
+                                                  <div className="flex flex-wrap items-center gap-2">
+                                                       {entry.avancee_statut && (
+                                                            <span
+                                                                 className={`pill pill-${TranslateAI(entry.avancee_statut)}`}
+                                                            >
+                                                                 {formatTitle(entry.avancee_statut)}
+                                                            </span>
+                                                       )}
+                                                       <span className="muted ml-auto text-caption">
+                                                            {entry.avancee_date.toLocaleDateString("fr-FR")}
                                                        </span>
+                                                  </div>
+                                                  <strong>{entry.avancee_titre}</strong>
+                                                  {entry.avancee_message && (
+                                                       <p className="m-0 text-body-sm">{entry.avancee_message}</p>
                                                   )}
-                                                  <span className="muted ml-auto text-caption">
-                                                       {entry.avancee_date.toLocaleDateString("fr-FR")}
-                                                  </span>
-                                             </div>
-                                             <strong>{entry.avancee_titre}</strong>
-                                             {entry.avancee_message && (
-                                                  <p className="m-0 text-body-sm">{entry.avancee_message}</p>
-                                             )}
-                                        </li>
-                                   ))}
-                         </ul>
+                                             </li>
+                                        ))}
+                              </ul>
+                         ) : (
+                              <p>Le projet n'a pas encore débuté.</p>
+                         )}
                     </section>
 
                     <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-1">

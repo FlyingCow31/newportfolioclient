@@ -2,12 +2,38 @@ import { cacheLife, cacheTag } from "next/cache"
 import { sql } from "./db"
 import { Avancee, Clause, Client, Depense, Invoice, Projet, Todo } from "./types"
 
+function isProjectInfo(value: unknown): value is NonNullable<Projet["proj_info"]> {
+     return (
+          Array.isArray(value) &&
+          value.every(
+               (info) =>
+                    typeof info === "object" &&
+                    info !== null &&
+                    "cle" in info &&
+                    "valeur" in info &&
+                    typeof info.cle === "string" &&
+                    typeof info.valeur === "string",
+          )
+     )
+}
+
+function normalizeProjectInfo(value: unknown): Projet["proj_info"] | undefined {
+     if (value === null || value === undefined) return undefined
+
+     const parsed = typeof value === "string" ? JSON.parse(value) : value
+     if (!isProjectInfo(parsed)) {
+          throw new Error("Invalid project information format")
+     }
+
+     return parsed
+}
+
 // * Get all ([])
 // For the two of them, it returns arrays because we need all of them, so they're gonna be in a .map anyway
 export async function getProjects(): Promise<Projet[]> {
      "use cache"
      cacheLife("days")
-     cacheTag("projects")
+     cacheTag("projets")
 
      return (await sql`SELECT * FROM projet ORDER BY proj_deadline ASC`) as Projet[]
 }
@@ -64,9 +90,17 @@ export async function getProject(proj_id: number): Promise<Projet | undefined> {
      cacheLife("days")
      cacheTag(`project-n${proj_id}`)
 
-     const projects = (await sql`SELECT * FROM projet WHERE proj_id = ${proj_id}`) as Projet[]
+     const projects = (await sql`SELECT * FROM projet WHERE proj_id = ${proj_id}`) as (Projet & {
+          proj_info?: unknown
+     })[]
 
-     return projects[0]
+     const project = projects[0]
+     if (!project) return undefined
+
+     return {
+          ...project,
+          proj_info: normalizeProjectInfo(project.proj_info),
+     }
 }
 export async function getAvancee(proj_id: number): Promise<Avancee[]> {
      "use cache"
