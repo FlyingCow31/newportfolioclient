@@ -3,65 +3,9 @@ import Link from "next/link"
 import { CheckRedirect } from "@/app/lib/auth/auth"
 import { getProjects, getAvancees, getClients } from "@/app/lib/data"
 import { Avancee, Client, Projet } from "@/app/lib/types"
+import DeleteButton from "@/app/components/admin/projets/DeleteButton"
 
 type Status = "late" | "en_cours" | "attente_client" | "planifie"
-
-// const projects: {
-//      id: string
-//      name: string
-//      client: string
-//      step: number
-//      stepLabel: string
-//      status: Status
-//      statusLabel: string
-//      due: string
-//      activity: string
-// }[] = [
-//      {
-//           id: "1",
-//           name: "Site vitrine",
-//           client: "Cabinet Roux",
-//           step: 1,
-//           stepLabel: "Maquettes",
-//           status: "late",
-//           statusLabel: "En retard",
-//           due: "08/10",
-//           activity: "il y a 4 jours",
-//      },
-//      {
-//           id: "2",
-//           name: "Refonte",
-//           client: "Gîtes du Lac",
-//           step: 3,
-//           stepLabel: "Contenus",
-//           status: "you",
-//           statusLabel: "À toi",
-//           due: "14/10",
-//           activity: "hier",
-//      },
-//      {
-//           id: "3",
-//           name: "Site vitrine",
-//           client: "Boulangerie Lafont",
-//           step: 2,
-//           stepLabel: "Développement",
-//           status: "client",
-//           statusLabel: "En attente client",
-//           due: "30/10",
-//           activity: "il y a 3 jours",
-//      },
-//      {
-//           id: "4",
-//           name: "Maintenance",
-//           client: "Garage Dupuis",
-//           step: 1,
-//           stepLabel: "Planifié",
-//           status: "planned",
-//           statusLabel: "Planifié",
-//           due: "15/11",
-//           activity: "il y a 2 sem.",
-//      },
-// ]
 
 const filters: { id: "all" | Status; label: string }[] = [
      { id: "all", label: "Tous" },
@@ -113,13 +57,14 @@ export async function ProjetsPageContent({ searchParams }: { searchParams: Promi
                     </summary>
                     <ul className="muted m-0 flex list-none flex-col gap-2 px-4 pb-4">
                          {finished.map((f) => (
-                              <li key={f.proj_id}>
+                              <li key={f.proj_id} className="flex gap-5">
                                    {f.proj_type +
                                         " " +
                                         f.proj_nom +
                                         " " +
                                         "Terminé le: " +
                                         f.proj_done_at?.toLocaleString("fr-FR")}
+                                   <DeleteButton proj_id={f.proj_id} />
                               </li>
                          ))}
                     </ul>

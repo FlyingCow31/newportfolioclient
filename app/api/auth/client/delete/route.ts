@@ -1,6 +1,6 @@
 import { AdminCheck } from "@/app/lib/auth/auth"
 import { sql } from "@/app/lib/db"
-import { updateTag } from "next/cache"
+import { revalidateTag } from "next/cache"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function DELETE(request: NextRequest) {
@@ -15,7 +15,7 @@ export async function DELETE(request: NextRequest) {
      if (result.length === 0) {
           return NextResponse.json({ error: "Client not found or was not deleted." }, { status: 404 })
      }
-     updateTag("clients")
+     revalidateTag("clients", "days")
 
      return NextResponse.json({ success: true })
 }
