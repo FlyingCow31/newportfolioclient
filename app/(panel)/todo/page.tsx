@@ -1,6 +1,7 @@
 import { CheckRedirect } from "@/app/lib/auth/auth"
 import { getClients, getProjects, getTodos } from "@/app/lib/data"
 import { Todo } from "@/app/lib/types"
+import CreateTodoButton from "@/app/components/admin/todo/TodoCreate"
 import { connection } from "next/server"
 import { Suspense } from "react"
 
@@ -49,36 +50,13 @@ export async function TodoPageContent() {
           <>
                <h1 className="page-title">Todo.</h1>
 
-               {/* // TODO Implement Todo creation/deletion */}
-               <div className="card-sm flex flex-wrap gap-3 p-4">
-                    <label htmlFor="new-todo" className="sr-only">
-                         Nouvelle tâche
-                    </label>
-                    <input
-                         id="new-todo"
-                         type="text"
-                         placeholder="Nouvelle tâche…"
-                         className="field min-w-0 flex-fill"
-                    />
-                    <select aria-label="Projet lié" className="field flex-side">
-                         {projects.map((p, i) => (
-                              <option key={i}>
-                                   {clients.find((c) => c.client_id === p.client_id)?.client_bus || "Aucun!"}
-                              </option>
-                         ))}
-                    </select>
-                    <label htmlFor="new-todo-date" className="sr-only">
-                         Date d'échéance
-                    </label>
-                    <input id="new-todo-date" type="date" aria-label="Date d'échéance" className="field flex-side" />
-                    <button type="button" className="btn btn-primary flex-none shadow-none">
-                         Ajouter
-                    </button>
+               <div className="card-sm p-4">
+                    <CreateTodoButton projects={projects} clients={clients} />
                </div>
 
                <section className="card flex flex-col gap-2.5">
                     <h2 className="section-title mb-1">
-                         Aujourd'hui
+                         Aujourd&apos;hui
                          {dueToday[0] !== undefined && (
                               <span className="font-sans text-base font-medium text-muted">
                                    {" " + dueToday.length} à faire
