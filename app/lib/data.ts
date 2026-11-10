@@ -102,10 +102,11 @@ export async function getProject(proj_id: number): Promise<Projet | undefined> {
           proj_info: normalizeProjectInfo(project.proj_info),
      }
 }
+// Get Avancees for a particular project
 export async function getAvancee(proj_id: number): Promise<Avancee[]> {
      "use cache"
      cacheLife("days")
-     cacheTag(`projet-n${proj_id}`)
+     cacheTag(`avancee-n${proj_id}`)
      const avancees = await sql`SELECT * FROM avancee WHERE proj_id = ${proj_id}`
 
      return avancees as Avancee[]
