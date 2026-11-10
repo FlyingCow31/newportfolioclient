@@ -10,6 +10,7 @@ import { timeStamp } from "console"
 import { CheckRedirect } from "@/app/lib/auth/auth"
 import TimeEntryModal from "@/app/components/projet/TimeEntryModal"
 import Avancee from "@/app/components/projet/avancee/Avancee"
+import FinishButton from "@/app/components/projet/FinishButton"
 
 const tech = [
      { label: "Hébergement", value: "Vercel" },
@@ -88,6 +89,7 @@ export async function ProjetPageContent({ params }: { params: Promise<{ id: numb
                               </Link>
                          </div>
                          <div className="flex flex-wrap gap-3">
+                              <FinishButton proj_id={projet.proj_id} />
                               <TimeEntryModal
                                    projId={projet.proj_id}
                                    projectLabel={`${projet.proj_nom} · ${client.client_bus ?? client.client_nom}`}
