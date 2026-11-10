@@ -9,6 +9,7 @@ import { cacheLife } from "next/cache"
 import { timeStamp } from "console"
 import { CheckRedirect } from "@/app/lib/auth/auth"
 import TimeEntryModal from "@/app/components/projet/TimeEntryModal"
+import Avancee from "@/app/components/projet/avancee/Avancee"
 
 const tech = [
      { label: "Hébergement", value: "Vercel" },
@@ -118,24 +119,7 @@ export async function ProjetPageContent({ params }: { params: Promise<{ id: numb
                                    {[...avancees]
                                         .sort((a, b) => b.avancee_date.getTime() - a.avancee_date.getTime())
                                         .map((entry) => (
-                                             <li key={entry.avancee_id} className="item flex flex-col gap-2 p-4">
-                                                  <div className="flex flex-wrap items-center gap-2">
-                                                       {entry.avancee_statut && (
-                                                            <span
-                                                                 className={`pill pill-${TranslateAI(entry.avancee_statut)}`}
-                                                            >
-                                                                 {formatTitle(entry.avancee_statut)}
-                                                            </span>
-                                                       )}
-                                                       <span className="muted ml-auto text-caption">
-                                                            {entry.avancee_date.toLocaleDateString("fr-FR")}
-                                                       </span>
-                                                  </div>
-                                                  <strong>{entry.avancee_titre}</strong>
-                                                  {entry.avancee_message && (
-                                                       <p className="m-0 text-body-sm">{entry.avancee_message}</p>
-                                                  )}
-                                             </li>
+                                             <Avancee entry={entry} key={entry.avancee_id} />
                                         ))}
                               </ul>
                          ) : (
