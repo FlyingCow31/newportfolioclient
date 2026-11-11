@@ -1,3 +1,4 @@
+import ExpenseModal from "@/app/components/admin/finances/ExpenseModal"
 import { getDepenses, getInvoices, getProjects } from "@/app/lib/data"
 import Link from "next/link"
 import { connection } from "next/server"
@@ -82,9 +83,7 @@ export async function FinancesPageContent() {
                          <Link href="https://app.indy.fr/facturation/factures" className="btn">
                               Outil de facturation ↗
                          </Link>
-                         <button type="button" className="btn btn-primary">
-                              + Ajouter une dépense
-                         </button>
+                         <ExpenseModal projects={projets} spent={315000} profit={2525000} />
                     </div>
                </header>
 
