@@ -78,3 +78,45 @@ export function DeleteAvancee({ avancee_id }: { avancee_id: number }) {
           </button>
      )
 }
+export function DeleteTodo({
+     todo_id,
+     onDeleted,
+}: {
+     todo_id: number
+     onDeleted?: (todoId: number) => void
+}) {
+     const [confirm, setConfirm] = useState("X")
+     const [isDeleting, setIsDeleting] = useState(false)
+
+     async function handleDeletion(todo_id: number) {
+          setIsDeleting(true)
+          try {
+               const response = await fetch("/api/todo/delete", {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ data: { todo_id: todo_id } }),
+               })
+               if (!response.ok) {
+                    setConfirm("Erreur")
+                    return
+               }
+               onDeleted?.(todo_id)
+          } catch (error) {
+               console.error("Erreur avec la suppression de la todo.", error)
+               setConfirm("Erreur")
+          } finally {
+               setIsDeleting(false)
+          }
+     }
+
+     return (
+          <button
+               type="button"
+               disabled={isDeleting}
+               className="text-bold text-red-600 cursor-pointer"
+               onClick={confirm === "confirmer" ? () => handleDeletion(todo_id) : () => setConfirm("confirmer")}
+          >
+               {isDeleting ? "Suppression..." : confirm}
+          </button>
+     )
+}
