@@ -1,5 +1,8 @@
 import Clauses, { Company, handleCopy, InfoEntreprise } from "@/app/components/administration/clause"
+import ClauseModal from "@/app/components/administration/ClauseModal"
+import { CheckRedirect } from "@/app/lib/auth/auth"
 import { getClauses } from "@/app/lib/data"
+import { Suspense } from "react"
 
 const company = [
      { label: "Nom", value: "GAEL TOURNIER EI", strong: true },
@@ -42,8 +45,16 @@ const deadlines = [
           ? [{ day: "10", month: "SEP", title: "RC", sub: "Paiement annuel", next: true }]
           : []),
 ]
+export default function AdminPage() {
+     return (
+          <Suspense fallback={<p>Chargement...</p>}>
+               <AdministrationPage />
+          </Suspense>
+     )
+}
 
-export default async function AdministrationPage() {
+export async function AdministrationPage() {
+     await CheckRedirect()
      const clauses = await getClauses()
 
      return (
@@ -56,9 +67,6 @@ export default async function AdministrationPage() {
                               <h2 id="h-ent" className="section-title">
                                    Mon entreprise
                               </h2>
-                              <button type="button" className="link text-body-sm">
-                                   Modifier
-                              </button>
                          </div>
                          <InfoEntreprise company={company} />
                     </section>
@@ -94,10 +102,7 @@ export default async function AdministrationPage() {
                               <h2 id="h-clauses" className="section-title">
                                    Bibliothèque de clauses
                               </h2>
-                              {/* //TODO Make it work */}
-                              <button type="button" className="link text-body-sm">
-                                   + Ajouter
-                              </button>
+                              <ClauseModal />
                          </div>
                          {clauses.map((c) => (
                               <Clauses {...c} key={c.clause_id} />

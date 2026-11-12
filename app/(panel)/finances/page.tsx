@@ -1,4 +1,7 @@
+import InvoiceModal from "@/app/components/finances/InvoiceModal"
+import MarkPaidButton from "@/app/components/finances/MarkPaidButton"
 import ExpenseModal from "@/app/components/admin/finances/ExpenseModal"
+import { CheckRedirect } from "@/app/lib/auth/auth"
 import { getDepenses, getInvoices, getProjects } from "@/app/lib/data"
 import Link from "next/link"
 import { connection } from "next/server"
@@ -18,6 +21,7 @@ export default function FinancesPage() {
 }
 
 export async function FinancesPageContent() {
+     await CheckRedirect()
      const projets = await getProjects()
      const depenses = await getDepenses()
      const factures = await getInvoices()
@@ -153,27 +157,33 @@ export async function FinancesPageContent() {
                     </section>
 
                     <section aria-labelledby="h-fact" className="card flex flex-col gap-3">
-                         <div className="flex flex-col gap-0.5">
-                              <h2 id="h-fact" className="section-title">
-                                   Dernières factures
-                              </h2>
-                              <span className="muted text-caption">Émises depuis l&apos;outil de facturation</span>
+                         <div className="flex items-start justify-between gap-3">
+                              <div className="flex flex-col gap-0.5">
+                                   <h2 id="h-fact" className="section-title">
+                                        Dernières factures
+                                   </h2>
+                                   <span className="muted text-caption">Émises depuis l&apos;outil de facturation</span>
+                              </div>
+                              <InvoiceModal projects={projets} />
                          </div>
+
                          {factures.map((inv) => {
                               const isLate =
                                    inv.facture_pay_deadline.getTime() < today.getTime() && !inv.facture_paid_at
 
                               return (
-                                   <div key={inv.facture_num} className="item flex items-center gap-2.5">
+                                   <div
+                                        key={inv.facture_num}
+                                        className={`${isLate ? "bg-red-200" : ""} item flex items-center gap-2.5`}
+                                   >
                                         <div className="flex min-w-0 flex-1 flex-col">
-                                             <strong className="text-body-sm">{inv.facture_num}</strong>
+                                             <strong className={`text-body-sm`}>{inv.facture_num}</strong>
                                              <span className="muted truncate text-caption">
                                                   {inv.facture_date.toLocaleDateString("fr-FR")} · {inv.facture_mont}
                                              </span>
                                         </div>
-                                        <span className={`pill ${isLate ? "pill-late" : "pill-client"}`}>
-                                             {isLate ? "Retard" : "Facture"}
-                                        </span>
+
+                                        {isLate && <MarkPaidButton factureId={inv.facture_id} />}
                                    </div>
                               )
                          })}

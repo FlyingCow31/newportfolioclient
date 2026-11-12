@@ -1,3 +1,6 @@
+import { CheckRedirect } from "@/app/lib/auth/auth"
+import { Suspense } from "react"
+
 const sites = [
      {
           domain: "gitesdulac.fr",
@@ -40,8 +43,16 @@ const legend = [
      { label: "50-89", className: "bg-soft" },
      { label: "0-49", className: "bg-colerr" },
 ]
-
 export default function MonitoringPage() {
+     return (
+          <Suspense fallback={<p>Chargement...</p>}>
+               <MonitoringPageContent />
+          </Suspense>
+     )
+}
+
+export async function MonitoringPageContent() {
+     await CheckRedirect()
      return (
           <>
                <header className="flex flex-wrap items-end justify-between gap-4">

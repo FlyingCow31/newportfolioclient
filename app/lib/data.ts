@@ -66,7 +66,7 @@ export async function getInvoices(): Promise<Invoice[]> {
      "use cache"
      cacheLife("max")
      cacheTag("invoices")
-     return (await sql`SELECT * FROM facture ORDER BY facture_date ASC`) as Invoice[]
+     return (await sql`SELECT * FROM facture ORDER BY facture_date DESC`) as Invoice[]
 }
 
 export async function getDepenses(): Promise<Depense[]> {

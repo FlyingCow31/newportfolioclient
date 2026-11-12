@@ -21,7 +21,6 @@ export default function Clauses(c: Clause) {
 
      return (
           <div className="item flex items-center gap-3">
-               SIRET
                <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                     <strong className="text-body-sm">{c.clause_key}</strong>
                     <span className="muted truncate text-caption">{c.clause_text}</span>
