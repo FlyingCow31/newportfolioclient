@@ -71,12 +71,7 @@ async function ClientContent() {
                </header>
 
                <section aria-label="Statut du projet" className="card flex flex-col gap-5">
-                    {projet && (
-                         <Progression
-                              projet={projet as Parameters<typeof Progression>[0]["projet"]}
-                              avancee={avancees}
-                         />
-                    )}
+                    <Progression projet={projet as Parameters<typeof Progression>[0]["projet"]} avancee={avancees} />
                </section>
 
                <div className="grid items-start gap-6 lg:grid-main-aside lg:gap-7">
@@ -84,7 +79,7 @@ async function ClientContent() {
                          <h2 id="t-avancee" className="section-title">
                               Avancée
                          </h2>
-                         <StepTable avancee={avancees} />
+                         <StepTable avancee={avancees} projet={projet} />
                     </section>
 
                     <div className="flex flex-col gap-6 lg:gap-7">

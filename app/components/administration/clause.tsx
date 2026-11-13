@@ -1,5 +1,6 @@
 "use client"
 import type { Clause } from "@/app/lib/types"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 
 export type Company = {
@@ -36,7 +37,55 @@ export default function Clauses(c: Clause) {
                >
                     {!copied ? "Copier" : "Copié!"}
                </button>
+               <DeleteClauseButton clause_id={c.clause_id} />
           </div>
+     )
+}
+
+export function DeleteClauseButton({ clause_id }: { clause_id: number }) {
+     const router = useRouter()
+     const [confirm, setConfirm] = useState("X")
+     const [isDeleting, setIsDeleting] = useState(false)
+
+     async function handleDeletion() {
+          setIsDeleting(true)
+          try {
+               const response = await fetch("/api/clauses/delete", {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ data: { clause_id } }),
+               })
+
+               if (!response.ok) {
+                    setConfirm("Erreur")
+                    return
+               }
+
+               router.refresh()
+          } catch (error) {
+               console.error("Erreur avec la suppression de la clause.", error)
+               setConfirm("Erreur")
+          } finally {
+               setIsDeleting(false)
+          }
+     }
+
+     return (
+          <button
+               type="button"
+               disabled={isDeleting}
+               aria-label={confirm === "confirmer" ? "Confirmer la suppression de la clause" : "Supprimer la clause"}
+               className="btn btn-sm btn-danger flex-none"
+               onClick={confirm === "confirmer" ? handleDeletion : () => setConfirm("confirmer")}
+          >
+               {isDeleting
+                    ? "Suppression..."
+                    : confirm === "confirmer"
+                      ? "Confirmer ?"
+                      : confirm === "Erreur"
+                        ? "Erreur"
+                        : "Supprimer"}
+          </button>
      )
 }
 

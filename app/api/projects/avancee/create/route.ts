@@ -1,6 +1,6 @@
 import { AdminCheck } from "@/app/lib/auth/auth"
 import { sql } from "@/app/lib/db"
-import { revalidateTag } from "next/cache"
+import { revalidatePath, revalidateTag } from "next/cache"
 import { NextRequest, NextResponse } from "next/server"
 import z from "zod"
 
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
           deadline: formData.get("deadline") || null,
           titre: formData.get("titre"),
           message: formData.get("message") || null,
-          visible: formData.get("visible") === "true",
+          visible: formData.get("visible") === "on",
      })
 
      if (!result.success) {
@@ -52,8 +52,9 @@ export async function POST(request: NextRequest) {
      if (!insert[0]) return NextResponse.json({ error: "Server Error" }, { status: 500 })
 
      const av_id = insert[0].avancee_id
-     revalidateTag("avancees", "hours")
-     revalidateTag(`project-n${newProj_id}`, "days")
-     revalidateTag("projets", "days")
+     revalidateTag(`avancee-n${newProj_id}`, { expire: 0 })
+     revalidateTag(`project-n${newProj_id}`, { expire: 0 })
+     revalidateTag("projets", { expire: 0 })
+     revalidatePath(`/projets/${newProj_id}`)
      return NextResponse.json({ success: true, av_id })
 }

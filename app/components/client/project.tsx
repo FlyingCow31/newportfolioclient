@@ -1,12 +1,11 @@
 "use client"
 
+import { stepLabel, stepNumber } from "@/app/lib/steps"
 import { Avancee, ProjectProps } from "@/app/lib/types"
 import React from "react"
+import { sortAvancees } from "../admin/project"
 
 // Sort by their date attribute (user's input in admin panel)
-function SortAvancee(avancee: Avancee[]) {
-     return avancee.sort((a, b) => a.avancee_date.getDate() - b.avancee_date.getDate())
-}
 
 export function Progression({ projet, avancee }: ProjectProps) {
      // Header calculations
@@ -19,36 +18,6 @@ export function Progression({ projet, avancee }: ProjectProps) {
           visibleSteps?.find((item) => item.avancee_statut == "attente_client")
      const currentTitle = currentItem?.avancee_etape as string
 
-     // I just discovered the use of switch statement which I had never found use for, so I just use it everywhere
-     function findIndex(title: string) {
-          switch (title) {
-               case "demarrage":
-                    return 1
-               case "dev":
-                    return 2
-               case "seo":
-                    return 3
-               case "mel":
-                    return 4
-               default:
-                    return 0
-          }
-     }
-
-     function formatTitle(currentTitle: string) {
-          switch (currentTitle) {
-               case "demarrage":
-                    return "Démarrage"
-               case "dev":
-                    return "En Développement"
-               case "seo":
-                    return "Optimisation SEO"
-               case "mel":
-                    return "Mise en Ligne"
-               default:
-                    return "Diagnostic"
-          }
-     }
      // TODO: make the dashed line move
      function timeLineCreation(avancee: Avancee) {
           switch (avancee.avancee_statut) {
@@ -64,7 +33,7 @@ export function Progression({ projet, avancee }: ProjectProps) {
      }
 
      // Sorting the array to make it chronological ()
-     const sortedAvancee = SortAvancee(visibleSteps!)
+     const sortedAvancee = sortAvancees(visibleSteps ?? [], projet?.proj_type ?? "site")
 
      console.log(stepIndex)
 
@@ -74,7 +43,8 @@ export function Progression({ projet, avancee }: ProjectProps) {
                     <div className="flex flex-col gap-1.5">
                          <span className="muted text-body-sm font-medium">{projet?.proj_nom.toUpperCase()}</span>
                          <h2 className="section-title">
-                              Étape {findIndex(currentTitle)} sur {stepIndex} - {formatTitle(currentTitle)}
+                              Étape {stepNumber(projet?.proj_type ?? "site", currentTitle)} sur {stepIndex} -{" "}
+                              {stepLabel(projet?.proj_type ?? "site", currentTitle)}
                          </h2>
                     </div>
                     <div className="flex flex-col gap-1 sm:items-end">
@@ -84,7 +54,7 @@ export function Progression({ projet, avancee }: ProjectProps) {
                </div>
                <div
                     role="img"
-                    aria-label={`Avancement: Etape ${findIndex(currentTitle)} sur ${stepIndex}`}
+                    aria-label={`Avancement: Etape ${stepNumber(projet?.proj_type ?? "site", currentTitle)} sur ${stepIndex}`}
                     className="grid gap-2"
                     style={{ gridTemplateColumns: `repeat(${stepIndex}, minmax(0, 1fr))` }}
                >
@@ -96,7 +66,7 @@ export function Progression({ projet, avancee }: ProjectProps) {
      )
 }
 
-export function StepTable({ avancee }: ProjectProps) {
+export function StepTable({ avancee, projet }: ProjectProps) {
      function getStepBox(avancee: Avancee) {
           switch (avancee.avancee_statut) {
                case "termine":
@@ -126,36 +96,34 @@ export function StepTable({ avancee }: ProjectProps) {
           }
      }
 
-     const sortedAvancee = SortAvancee(avancee!)
+     const sortedAvancee = sortAvancees(
+          (avancee ?? []).filter((a) => a.avancee_visible_client),
+          projet?.proj_type ?? "site",
+     )
      return (
           <>
                <ol className="m-0 flex list-none flex-col p-0">
-                    {sortedAvancee.map(
-                         (step, i) =>
-                              step.avancee_visible_client && (
-                                   <li key={i} className="flex gap-4 sm:gap-5">
-                                        <div className="flex w-9 flex-none flex-col items-center">
-                                             {getStepBox(step)}
-                                             {i < sortedAvancee.length - 1 && (
-                                                  <div
-                                                       className={`min-h-7 flex-1 ${step.avancee_statut === "termine" ? "w-0.75 bg-ink" : "border-l-3 border-dashed border-ink"}`}
-                                                  />
-                                             )}
-                                        </div>
+                    {sortedAvancee.map((step, i) => (
+                         <li key={i} className="flex gap-4 sm:gap-5">
+                              <div className="flex w-9 flex-none flex-col items-center">
+                                   {getStepBox(step)}
+                                   {i < sortedAvancee.length - 1 && (
                                         <div
-                                             className={`flex flex-col gap-2 pt-1 ${i < sortedAvancee.length - 1 ? "pb-7" : ""}`}
-                                        >
-                                             <span className="text-lg font-bold">{step.avancee_titre}</span>
-                                             {step.avancee_statut === "attente_client" && (
-                                                  <span className="pill pill-client self-start whitespace-normal">
-                                                       Besoin de vous!
-                                                  </span>
-                                             )}
-                                             <span className="muted text-body-sm">{step.avancee_message}</span>
-                                        </div>
-                                   </li>
-                              ),
-                    )}
+                                             className={`min-h-7 flex-1 ${step.avancee_statut === "termine" ? "w-0.75 bg-ink" : "border-l-3 border-dashed border-ink"}`}
+                                        />
+                                   )}
+                              </div>
+                              <div className={`flex flex-col gap-2 pt-1 ${i < sortedAvancee.length - 1 ? "pb-7" : ""}`}>
+                                   <span className="text-lg font-bold">{step.avancee_titre}</span>
+                                   {step.avancee_statut === "attente_client" && (
+                                        <span className="pill pill-client self-start whitespace-normal">
+                                             Besoin de vous!
+                                        </span>
+                                   )}
+                                   <span className="muted text-body-sm">{step.avancee_message}</span>
+                              </div>
+                         </li>
+                    ))}
                </ol>
           </>
      )

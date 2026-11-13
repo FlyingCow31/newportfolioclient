@@ -13,22 +13,24 @@ const company = [
      { label: "Adresse", value: "22 Allée du Loiret, 31770 Colomiers" },
 ]
 
-function createDeadlines() {
+export function createDeadlines() {
      const formatter = new Intl.DateTimeFormat("fr-FR", { month: "short" })
      const currentMonth = new Date()
-     const nextMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1)
+     const firstMonthOffset = currentMonth.getDate() > 3 ? 1 : 0
+     const firstDeadlineMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + firstMonthOffset, 1)
+     const secondDeadlineMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + firstMonthOffset + 1, 1)
 
      return [
           {
                day: "03",
-               month: formatter.format(currentMonth).replace(".", "").toUpperCase(),
+               month: formatter.format(firstDeadlineMonth).replace(".", "").toUpperCase(),
                title: "Déclaration URSAFF",
                sub: "Mensuelle",
                next: true,
           },
           {
                day: "03",
-               month: formatter.format(nextMonth).replace(".", "").toUpperCase(),
+               month: formatter.format(secondDeadlineMonth).replace(".", "").toUpperCase(),
                title: "Déclaration URSAFF",
                sub: "Mensuelle",
                next: false,

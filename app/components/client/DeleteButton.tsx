@@ -15,7 +15,12 @@ async function handleDelete(client_id: number) {
 
 export default function DeleteButton({ client_id }: { client_id: number }) {
      return (
-          <button onClick={() => handleDelete(client_id)} className="text-red-900 text-xl cursor-pointer">
+          <button
+               type="button"
+               aria-label="Supprimer le client"
+               onClick={() => handleDelete(client_id)}
+               className="btn btn-icon btn-sm btn-danger"
+          >
                X
           </button>
      )

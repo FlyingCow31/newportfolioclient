@@ -167,26 +167,29 @@ export async function FinancesPageContent() {
                               <InvoiceModal projects={projets} />
                          </div>
 
-                         {factures.map((inv) => {
-                              const isLate =
-                                   inv.facture_pay_deadline.getTime() < today.getTime() && !inv.facture_paid_at
+                         {factures
+                              .map((inv) => {
+                                   const isLate =
+                                        inv.facture_pay_deadline.getTime() < today.getTime() && !inv.facture_paid_at
 
-                              return (
-                                   <div
-                                        key={inv.facture_num}
-                                        className={`${isLate ? "bg-red-200" : ""} item flex items-center gap-2.5`}
-                                   >
-                                        <div className="flex min-w-0 flex-1 flex-col">
-                                             <strong className={`text-body-sm`}>{inv.facture_num}</strong>
-                                             <span className="muted truncate text-caption">
-                                                  {inv.facture_date.toLocaleDateString("fr-FR")} · {inv.facture_mont}
-                                             </span>
+                                   return (
+                                        <div
+                                             key={inv.facture_num}
+                                             className={`${isLate ? "bg-red-200" : ""} item flex items-center gap-2.5`}
+                                        >
+                                             <div className="flex min-w-0 flex-1 flex-col">
+                                                  <strong className={`text-body-sm`}>{inv.facture_num}</strong>
+                                                  <span className="muted truncate text-caption">
+                                                       {inv.facture_date.toLocaleDateString("fr-FR")} ·{" "}
+                                                       {inv.facture_mont}
+                                                  </span>
+                                             </div>
+
+                                             {isLate && <MarkPaidButton factureId={inv.facture_id} />}
                                         </div>
-
-                                        {isLate && <MarkPaidButton factureId={inv.facture_id} />}
-                                   </div>
-                              )
-                         })}
+                                   )
+                              })
+                              .slice(0, 3)}
                     </section>
                </div>
 

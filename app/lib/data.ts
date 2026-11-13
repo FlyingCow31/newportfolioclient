@@ -35,7 +35,19 @@ export async function getProjects(): Promise<Projet[]> {
      cacheLife("days")
      cacheTag("projets")
 
-     return (await sql`SELECT * FROM projet ORDER BY proj_deadline ASC`) as Projet[]
+     // explaining: p. is an alias defined in the FROM. COALESCE(x, y) returns x or Y, here only X is defined as we only need to check if it's true
+     return (await sql`
+               SELECT p.*,
+               COALESCE((
+                    SELECT a.avancee_statut <> 'termine' AND a.avancee_date < CURRENT_DATE
+                    FROM avancee a
+                    WHERE a.proj_id = p.proj_id
+                    ORDER BY a.avancee_date DESC, a.avancee_created_at DESC
+                    LIMIT 1
+                    ), false) AND p.proj_done_at IS NULL AS proj_late
+               FROM projet p
+               ORDER BY p.proj_deadline ASC
+          `) as Projet[]
 }
 
 export async function getClients(): Promise<Client[]> {
@@ -90,9 +102,11 @@ export async function getProject(proj_id: number): Promise<Projet | undefined> {
      cacheLife("days")
      cacheTag(`project-n${proj_id}`)
 
-     const projects = (await sql`SELECT * FROM projet WHERE proj_id = ${proj_id}`) as (Projet & {
-          proj_info?: unknown
-     })[]
+     const projects = (await sql`
+                         SELECT *, COALESCE(proj_deadline < CURRENT_DATE AND proj_done_at IS NULL, false) AS proj_late
+                         FROM projet
+                         WHERE proj_id = ${proj_id}
+                         `) as (Projet & { proj_info?: unknown })[]
 
      const project = projects[0]
      if (!project) return undefined

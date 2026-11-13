@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation"
 import { STEP_TEMPLATES, type ProjectType } from "@/app/lib/steps"
 import { Client } from "@/app/lib/types"
 
-// TODO: if existing, switch the mail sending off
 type ClientMode = "existing" | "new"
 type Info = { id: number; cle: string; valeur: string }
 
@@ -115,6 +114,7 @@ export default function NewProjectForm({ clients }: { clients: Client[] }) {
           router.push(`/projets/${data.proj_id}`)
      }
 
+     // TODO: Add a loading state
      return (
           <form
                onSubmit={handleSubmit}
@@ -345,7 +345,7 @@ export default function NewProjectForm({ clients }: { clients: Client[] }) {
                                         type="button"
                                         aria-label="Supprimer cette info"
                                         onClick={() => removeInfo(info.id)}
-                                        className="btn btn-icon btn-sm size-12 flex-none shadow-none"
+                                        className="btn btn-icon btn-sm btn-danger size-12 flex-none"
                                    >
                                         <svg
                                              width="16"
@@ -386,28 +386,6 @@ export default function NewProjectForm({ clients }: { clients: Client[] }) {
                                    </li>
                               ))}
                          </ol>
-                    </section>
-
-                    <section className="border-3 border-ink bg-white p-5 shadow-brutal-lg">
-                         <label className="flex cursor-pointer items-center justify-between gap-3">
-                              <span className="flex flex-col gap-0.5">
-                                   <strong>Créer l&apos;accès client</strong>
-                                   <span className="muted text-sm">
-                                        {access
-                                             ? "Un e-mail d'invitation sera envoyé au client pour choisir son mot de passe."
-                                             : "Le client n'aura pas encore accès à son espace."}
-                                   </span>
-                              </span>
-                              <input
-                                   type="checkbox"
-                                   role="switch"
-                                   name="create_access"
-                                   checked={access}
-                                   onChange={(e) => setAccess(e.target.checked)}
-                                   className="switch-input sr-only"
-                              />
-                              <span aria-hidden="true" className="switch" />
-                         </label>
                     </section>
 
                     <div className="flex flex-col gap-3">

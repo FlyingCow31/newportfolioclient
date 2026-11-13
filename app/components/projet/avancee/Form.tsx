@@ -1,6 +1,6 @@
 "use client"
+import { Step } from "@/app/lib/steps"
 import Link from "next/link"
-import { redirect } from "next/navigation"
 
 const statuses = [
      { value: "termine", label: "Terminé", checked: "has-checked:bg-ink has-checked:text-white" },
@@ -9,7 +9,7 @@ const statuses = [
      { value: "planifie", label: "Planifié", checked: "has-checked:bg-white" },
 ]
 
-export default function AvForm({ id, etapes }: { id: number; etapes: string[] }) {
+export default function AvForm({ id, etapes }: { id: number; etapes: readonly Step[] }) {
      async function HandleSubmit(e: React.FormEvent<HTMLFormElement>) {
           e.preventDefault()
           // Need to conver Number if check is null then it's false
@@ -23,9 +23,11 @@ export default function AvForm({ id, etapes }: { id: number; etapes: string[] })
 
           if (!response.ok) {
                const data = await response.json()
-               console.log(data.error)
+               console.error(data.error)
+               return
           }
-          redirect(`/projets/${id}`)
+
+          window.location.assign(`/projets/${id}`)
      }
      return (
           <form
@@ -40,7 +42,7 @@ export default function AvForm({ id, etapes }: { id: number; etapes: string[] })
                          <h2 id="h-modal" className="section-title">
                               Nouvelle avancée
                          </h2>
-                         <span className="muted text-body-sm">Site vitrine · Boulangerie Lafont</span>
+                         <span className="muted text-body-sm"></span>
                     </div>
                     <Link
                          href={`/projets/${id}`}
@@ -66,9 +68,11 @@ export default function AvForm({ id, etapes }: { id: number; etapes: string[] })
                     <label htmlFor="f-etape" className="label">
                          Étape
                     </label>
-                    <select id="f-etape" defaultValue={etapes[1]} className="field" name="etape">
-                         {etapes.map((e) => (
-                              <option key={e}>{e}</option>
+                    <select id="f-etape" defaultValue={etapes[0]?.key} className="field" name="etape">
+                         {etapes.map((etape) => (
+                              <option key={etape.key} value={etape.key}>
+                                   {etape.label}
+                              </option>
                          ))}
                     </select>
                </div>
@@ -85,7 +89,7 @@ export default function AvForm({ id, etapes }: { id: number; etapes: string[] })
                                         type="radio"
                                         name="statut"
                                         value={s.value}
-                                        defaultChecked={s.value === "client"}
+                                        defaultChecked={s.value === "en_cours"}
                                         className="sr-only"
                                    />
                                    {s.label}
@@ -98,26 +102,14 @@ export default function AvForm({ id, etapes }: { id: number; etapes: string[] })
                     <label htmlFor="f-titre" className="label">
                          Titre
                     </label>
-                    <input
-                         id="f-titre"
-                         type="text"
-                         defaultValue="Textes « À propos » à envoyer"
-                         className="field"
-                         name="titre"
-                    />
+                    <input id="f-titre" type="text" defaultValue="Oui" className="field" name="titre" />
                </div>
 
                <div className="flex flex-col gap-2">
                     <label htmlFor="f-msg" className="label">
                          Message
                     </label>
-                    <textarea
-                         id="f-msg"
-                         rows={3}
-                         defaultValue="J'ai besoin de 3 à 5 lignes sur votre histoire et 2 photos de l'équipe."
-                         className="field"
-                         name="message"
-                    />
+                    <textarea id="f-msg" rows={3} defaultValue="J'ai" className="field" name="message" />
                </div>
 
                <div className="grid gap-3.5 sm:grid-cols-2">

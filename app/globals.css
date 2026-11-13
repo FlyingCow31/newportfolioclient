@@ -197,6 +197,17 @@
           border: 2px dashed var(--color-ink);
           box-shadow: none;
      }
+     .btn-danger {
+          border-color: var(--color-colerr-dark);
+          background: #ffffff;
+          color: var(--color-colerr-dark);
+          box-shadow: 3px 3px 0 var(--color-colerr-dark);
+     }
+     .btn-danger:hover {
+          background: #fff0ef;
+          color: var(--color-colerr-dark);
+          box-shadow: 1px 1px 0 var(--color-colerr-dark);
+     }
 
      .pill {
           display: inline-block;

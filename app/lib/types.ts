@@ -13,6 +13,7 @@ export type Projet = {
      }[]
      proj_created_at: number
      proj_done_at?: number
+     proj_late: boolean
 }
 export type Avancee = {
      avancee_id: number

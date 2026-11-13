@@ -4,6 +4,8 @@ import { Suspense } from "react"
 import { getAvancees, getProjects, getTodos } from "../lib/data"
 import { Avancee, Projet, NextSummary } from "../lib/types"
 import { formatTitle, TranslateAI } from "./projets/page"
+import { createDeadlines } from "./administration/page"
+import DashboardTodos from "../components/admin/todo/DashboardTodos"
 
 export default function HomePage() {
      // TODO : Integrate a loading skeletton
@@ -14,15 +16,22 @@ export default function HomePage() {
      )
 }
 
-// TODO: delete when the calendar has been integrated
-const stats = [{ label: "Déclaration URSSAF", value: "31/10", sub: "dans 21 jours", tone: "" }]
-
 export async function HomePageContent() {
      await CheckRedirect()
 
      const projects = await getProjects()
      const avancees = await getAvancees()
      const todos = await getTodos()
+
+     const deadlines = [
+          ...createDeadlines(),
+          ...(new Date().getMonth() === 10
+               ? [{ day: "10", month: "DÉC", title: "CFE", sub: "Paiement annuel", next: true }]
+               : []),
+          ...(new Date().getMonth() === 8
+               ? [{ day: "10", month: "SEP", title: "RC", sub: "Paiement annuel", next: true }]
+               : []),
+     ]
 
      // used for down there
      const date = Date.now()
@@ -95,11 +104,11 @@ export async function HomePageContent() {
                return null
           }
 
-          // TODO: Implémenter une fonctionnalité d'auto-late si ça passe en late ?
-
           return (
                <li className="item flex flex-wrap items-center gap-x-4 gap-y-3">
                     {latestAvancee.avancee_date.getTime() < date ? (
+                         <span className={`pill pill-late`}>En retard</span>
+                    ) : projet.proj_late ? (
                          <span className={`pill pill-late`}>En retard</span>
                     ) : (
                          <span className={`pill pill-${TranslateAI(latestAvancee.avancee_statut)}`}>
@@ -154,7 +163,7 @@ export async function HomePageContent() {
                          <h1 className="page-title">Bonjour Gaël.</h1>
                     </div>
                     <div className="flex flex-wrap gap-3.5">
-                         <Link href="/projets" className="btn">
+                         <Link href="/projets/nouveau" className="btn">
                               Nouveau projet
                          </Link>
                     </div>
@@ -171,15 +180,15 @@ export async function HomePageContent() {
                          <span className="text-sm truncate">{TitleWaiting}</span>
                     </div>
                     <div className={`card-sm flex flex-col gap-1.5 `}>
-                         <span className="text-sm font-bold">A venir</span>
+                         <span className="text-sm font-bold">A Faire</span>
                          <span className="stat">{nbNext}</span>
                          <span className="text-sm">{titleNext}</span>
                     </div>
-                    {/* // TODO: link to calendar (see const stats up there) */}
+
                     <div className={`card-sm flex flex-col gap-1.5 `}>
-                         <span className="text-sm font-bold"></span>
-                         <span className="stat">{FindProjects(avancees)}</span>
-                         <span className="text-sm"></span>
+                         <span className="text-sm font-bold">{deadlines[0].title}</span>
+                         <span className="stat">{deadlines[0].day + " / " + deadlines[0].month}</span>
+                         <span className="text-sm">{deadlines[0].sub}</span>
                     </div>
                </section>
 
@@ -234,30 +243,7 @@ export async function HomePageContent() {
                               </ul>
                          </section>
 
-                         {/* // TODO: logic where if it's crossed, it vanishes.  */}
-                         <section aria-labelledby="h-todo" className="card flex flex-col gap-3">
-                              <div className="flex items-baseline justify-between gap-3">
-                                   <h2 id="h-todo" className="card-title">
-                                        Todo du jour
-                                   </h2>
-                                   <Link href="/todo" className="link text-body-sm">
-                                        Tout voir
-                                   </Link>
-                              </div>
-                              {todos
-                                   .sort((a, b) => a.todo_due - b.todo_due)
-                                   .filter((t) => t.todo_done !== true)
-                                   .map((todo) => (
-                                        <label
-                                             key={todo.todo_id}
-                                             className="flex min-h-10 cursor-pointer items-center gap-3 text-body-sm has-checked:text-muted has-checked:line-through"
-                                        >
-                                             <input type="checkbox" defaultChecked={todo.todo_done} className="check" />
-                                             {todo.todo_title}
-                                        </label>
-                                   ))
-                                   .slice(0, 3)}
-                         </section>
+                         <DashboardTodos todos={todos} />
                     </div>
                </div>
           </>

@@ -7,6 +7,7 @@ export default function DeleteButton({ proj_id }: { proj_id: number }) {
      const router = useRouter()
      const [confirm, setConfirm] = useState("X")
      const [isDeleting, setIsDeleting] = useState(false)
+     const isCompact = confirm !== "confirmer" && confirm !== "Erreur" && !isDeleting
 
      async function handleDeletion(proj_id: number) {
           setIsDeleting(true)
@@ -33,10 +34,11 @@ export default function DeleteButton({ proj_id }: { proj_id: number }) {
           <button
                type="button"
                disabled={isDeleting}
-               className="text-bold text-red-600 cursor-pointer"
+               aria-label={confirm === "confirmer" ? "Confirmer la suppression du projet" : "Supprimer le projet"}
+               className={`btn btn-sm btn-danger ${isCompact ? "btn-icon" : ""}`}
                onClick={confirm === "confirmer" ? () => handleDeletion(proj_id) : () => setConfirm("confirmer")}
           >
-               {isDeleting ? "Suppression..." : confirm}
+               {isDeleting ? "Suppression..." : confirm === "confirmer" ? "Confirmer ?" : confirm}
           </button>
      )
 }
@@ -45,6 +47,7 @@ export function DeleteAvancee({ avancee_id }: { avancee_id: number }) {
      const router = useRouter()
      const [confirm, setConfirm] = useState("X")
      const [isDeleting, setIsDeleting] = useState(false)
+     const isCompact = confirm !== "confirmer" && confirm !== "Erreur" && !isDeleting
 
      async function handleDeletion(avancee_id: number) {
           setIsDeleting(true)
@@ -71,22 +74,18 @@ export function DeleteAvancee({ avancee_id }: { avancee_id: number }) {
           <button
                type="button"
                disabled={isDeleting}
-               className="text-bold text-red-600 cursor-pointer"
+               aria-label={confirm === "confirmer" ? "Confirmer la suppression de l'étape" : "Supprimer l'étape"}
+               className={`btn btn-sm btn-danger ${isCompact ? "btn-icon" : ""}`}
                onClick={confirm === "confirmer" ? () => handleDeletion(avancee_id) : () => setConfirm("confirmer")}
           >
-               {isDeleting ? "Suppression..." : confirm}
+               {isDeleting ? "Suppression..." : confirm === "confirmer" ? "Confirmer ?" : confirm}
           </button>
      )
 }
-export function DeleteTodo({
-     todo_id,
-     onDeleted,
-}: {
-     todo_id: number
-     onDeleted?: (todoId: number) => void
-}) {
+export function DeleteTodo({ todo_id, onDeleted }: { todo_id: number; onDeleted?: (todoId: number) => void }) {
      const [confirm, setConfirm] = useState("X")
      const [isDeleting, setIsDeleting] = useState(false)
+     const isCompact = confirm !== "confirmer" && confirm !== "Erreur" && !isDeleting
 
      async function handleDeletion(todo_id: number) {
           setIsDeleting(true)
@@ -113,10 +112,11 @@ export function DeleteTodo({
           <button
                type="button"
                disabled={isDeleting}
-               className="text-bold text-red-600 cursor-pointer"
+               aria-label={confirm === "confirmer" ? "Confirmer la suppression de la tâche" : "Supprimer la tâche"}
+               className={`btn btn-sm btn-danger ${isCompact ? "btn-icon" : ""}`}
                onClick={confirm === "confirmer" ? () => handleDeletion(todo_id) : () => setConfirm("confirmer")}
           >
-               {isDeleting ? "Suppression..." : confirm}
+               {isDeleting ? "Suppression..." : confirm === "confirmer" ? "Confirmer ?" : confirm}
           </button>
      )
 }

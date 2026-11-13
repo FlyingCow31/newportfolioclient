@@ -89,10 +89,14 @@ async function FilteredProjects({
 }
 
 // Gives you a list of projects that have the statut provided.
-function AvanceeProject({ avancees, statut }: { avancees: Avancee[]; statut: string }) {
-     const sortedProjects = new Set(
+function AvanceeProject({ avancees, statut, projects }: { avancees: Avancee[]; statut: string; projects: Projet[] }) {
+     let sortedProjects = new Set(
           avancees.filter((avancee) => avancee.avancee_statut == statut).map((avancee) => avancee.proj_id),
      )
+
+     if (statut === "late") {
+          sortedProjects = new Set(projects.filter((p) => p.proj_late === true).map((p) => p.proj_id))
+     }
      console.log(sortedProjects)
      return sortedProjects
 }
@@ -138,17 +142,17 @@ async function ProjectsView({
      clients: Client[]
 }) {
      const date = Date.now()
-     const projectsWithStatus = AvanceeProject({ avancees, statut })
+     const projectsWithStatus = AvanceeProject({ avancees, statut, projects })
      const topOfThePage = ({ avancees, statut }: { avancees: Avancee[]; statut: string }) =>
-          AvanceeProject({ avancees, statut })
+          AvanceeProject({ avancees, statut, projects })
 
-     // Determines all the avancees that are late (thos who aren't done or waiting for client)
+     // Determines all the avancees that are late (those who aren't done or waiting for client)
      const lateAvancees = avancees.filter(
           (avancee) =>
                (avancee.avancee_date.getTime() < date && avancee.avancee_statut == "en_cours") ||
                avancee.avancee_statut == "planifie",
      )
-     const lateProjects = new Set(lateAvancees.map((avancees) => avancees.proj_id)).size
+     const lateProjects = projects.filter((project) => project.proj_late).length
      const rows =
           statut === "all"
                ? projects.filter((p) => !p.proj_done_at)
@@ -157,7 +161,6 @@ async function ProjectsView({
      return (
           <>
                <nav aria-label="Filtrer par statut" className="flex flex-wrap gap-2.5">
-                    {/* // TODO: When the late state is created (and the auto-late script as well), this will work  */}
                     {filters.map((f) => (
                          <Link
                               key={f.id}
